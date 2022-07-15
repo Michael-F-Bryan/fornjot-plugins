@@ -1,5 +1,6 @@
 use fornjot_plugins::prelude::*;
 
+// TODO: replace this with a custom attribute.
 fornjot_plugins::register_plugin!(|host| {
     host.register_model::<Cuboid>();
 });

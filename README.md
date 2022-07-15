@@ -1,10 +1,27 @@
-# fornjot-plugins
+# Fornjot Plugins
 
 [![Continuous integration](https://github.com/Michael-F-Bryan/fornjot-plugins/workflows/Continuous%20integration/badge.svg?branch=master)](https://github.com/Michael-F-Bryan/fornjot-plugins/actions)
 
 ([API Docs])
 
 A proof-of-concept plugin system for [Fornjot][fornjot].
+
+## Getting Started
+
+After you've installed [the Rust compiler][rustup] and cloned this repo, you
+will want to compile a model.
+
+```console
+$ cargo build -p cuboid --release
+$ ls target/release/*.so
+target/release/libcuboid.so
+```
+
+Once you've done that, Fornjot should be able to load it.
+
+```console
+$ fj-app --model target/release/libcuboid.so
+```
 
 ## License
 
@@ -33,3 +50,4 @@ do their best to avoid them, and welcome help in analysing and fixing them.
 [API Docs]: https://michael-f-bryan.github.io/fornjot-plugins
 [crev]: https://github.com/crev-dev/cargo-crev
 [fornjot]: https://www.fornjot.app/
+[rustup]: https://rustup.rs/
