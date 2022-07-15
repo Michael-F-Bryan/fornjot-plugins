@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["fornjot_plugin_init",""]],"struct":[["Cuboid",""]]};
