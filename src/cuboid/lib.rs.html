@@ -54,8 +54,10 @@
 <span id="48">48</span>
 <span id="49">49</span>
 <span id="50">50</span>
+<span id="51">51</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fornjot_plugins::prelude</span>::<span class="kw-2">*</span>;
 
+<span class="comment">// TODO: replace this with a custom attribute.</span>
 <span class="macro">fornjot_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> {
     <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">Cuboid</span><span class="op">&gt;</span>();
 });
