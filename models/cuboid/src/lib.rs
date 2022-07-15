@@ -1,9 +1,8 @@
 use fornjot_plugins::prelude::*;
 
-#[no_mangle] // TODO: hide this behind a custom attribute
-pub fn fornjot_plugin_init(host: &mut dyn Host) {
+fornjot_plugins::register_plugin!(|host| {
     host.register_model::<Cuboid>();
-}
+});
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Cuboid {

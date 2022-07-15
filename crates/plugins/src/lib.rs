@@ -32,9 +32,11 @@ pub trait Context {
     }
 }
 
+/// The error returned when a required argument wasn't provided.
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 #[error("The \"{name}\" argument is missing")]
 pub struct MissingArgument {
+    /// The argument's name.
     pub name: String,
 }
 
@@ -42,8 +44,10 @@ type ModelConstructor = fn(&dyn crate::Context) -> Result<Box<dyn Model>, Error>
 
 /// The Fornjot host.
 pub trait Host {
-    /// Register a model. You are probably looking for the
-    /// [`HostExt::register_model()`] method.
+    /// Register a model.
+    ///
+    /// Don't use this directly. You probably want to use the
+    /// [`HostExt::register_model()`] method instead.
     fn register_model_constructor(&mut self, constructor: ModelConstructor);
 }
 
