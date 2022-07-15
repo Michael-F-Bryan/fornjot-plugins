@@ -84,6 +84,8 @@ impl crate::Host for Host {
 #[macro_export]
 macro_rules! register_plugin {
     ($init:expr) => {
+        #[no_mangle]
+        #[doc(hidden)]
         pub fn fornjot_plugin_init(host: &mut dyn $crate::Host) {
             let init: fn(&mut dyn $crate::Host) = $init;
             init(host);

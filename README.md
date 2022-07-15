@@ -12,7 +12,7 @@ After you've installed [the Rust compiler][rustup] and cloned this repo, you
 will want to compile a model.
 
 ```console
-$ cargo build -p cuboid --release
+$ cargo build --release --package cuboid
 $ ls target/release/*.so
 target/release/libcuboid.so
 ```
