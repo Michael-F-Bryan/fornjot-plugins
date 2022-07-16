@@ -3,13 +3,7 @@ use std::collections::HashMap;
 use anyhow::Context as _;
 use once_cell::sync::Lazy;
 
-use crate::ModelConstructor;
-
-extern "Rust" {
-    /// The "entrypoint" for all plugins. This will be called once when the
-    /// plugin is first loaded and the result will be cached.
-    fn fornjot_plugin_init(host: &mut dyn crate::Host);
-}
+use crate::{shim::fornjot_plugin_init, ModelConstructor};
 
 static HOST: Lazy<Host> = Lazy::new(|| {
     let mut host = Host::default();
@@ -76,19 +70,4 @@ impl crate::Host for Host {
     fn register_model_constructor(&mut self, constructor: ModelConstructor) {
         self.constructor = constructor;
     }
-}
-
-/// Declare the function that will be called when a plugin is first initialized.
-///
-/// This is where you'll do things like registering a model with the host.
-#[macro_export]
-macro_rules! register_plugin {
-    ($init:expr) => {
-        #[no_mangle]
-        #[doc(hidden)]
-        pub fn fornjot_plugin_init(host: &mut dyn $crate::Host) {
-            let init: fn(&mut dyn $crate::Host) = $init;
-            init(host);
-        }
-    };
 }

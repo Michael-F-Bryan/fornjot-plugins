@@ -1,7 +1,7 @@
-use fornjot_plugins::prelude::*;
+use fj_plugins::{Context, HostExt, Model};
 
 // TODO: replace this with a custom attribute.
-fornjot_plugins::register_plugin!(|host| {
+fj_plugins::register_plugin!(|host| {
     host.register_model::<Cuboid>();
 });
 

@@ -1,5 +1,5 @@
 [package]
-name = "fornjot-plugins"
+name = "fj-plugins"
 version = "0.1.0"
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
 license = "MIT OR Apache-2.0"
@@ -7,6 +7,7 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1.0.58"
+cfg-if = "1.0.0"
 fj = { git = "https://github.com/hannobraun/Fornjot" }
 once_cell = "1.13.0"
 thiserror = "1.0.31"
