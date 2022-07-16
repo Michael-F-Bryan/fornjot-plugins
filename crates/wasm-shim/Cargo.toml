@@ -12,5 +12,6 @@ crate-type = ["cdylib", "rlib"]
 anyhow = "1.0.58"
 fj = { git = "https://github.com/hannobraun/Fornjot" }
 fj-plugins = { version = "0.1.0", path = "../plugins" }
+log = "0.4.17"
 wasmtime = "0.38.1"
 wit-bindgen-wasmtime = { git = "https://github.com/bytecodealliance/wit-bindgen" }

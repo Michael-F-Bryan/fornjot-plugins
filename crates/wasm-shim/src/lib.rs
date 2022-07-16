@@ -1,3 +1,6 @@
+//! A wrapper plugin which makes the WebAssembly plugin pointed to by
+//! `$WASM_BINARY` and makes it callable using the native ABI.
+
 use std::{
     fmt::{self, Display, Formatter},
     sync::{Arc, Mutex},
@@ -8,6 +11,7 @@ use fj_plugins::{Model, PluginMetadata};
 use wasmtime::{Engine, Linker, Module, Store};
 
 wit_bindgen_wasmtime::import!("../../wit-files/guest.wit");
+wit_bindgen_wasmtime::export!("../../wit-files/host.wit");
 
 fj_plugins::register_plugin!(|host| {
     let wasm_binary = std::env::var("WASM_BINARY")
@@ -18,9 +22,9 @@ fj_plugins::register_plugin!(|host| {
 
     let engine = Engine::default();
     let module = Module::new(&engine, &wasm).context("Unable to parse the WebAssembly module")?;
-
     let mut store = Store::new(&engine, State::default());
     let mut linker = Linker::new(&engine);
+    host::add_to_linker(&mut linker, |s: &mut State| &mut s.host)?;
     let (guest, _instance) = guest::Guest::instantiate(&mut store, &module, &mut linker, |state| {
         &mut state.guest_data
     })
@@ -83,6 +87,69 @@ impl Model for WebAssemblyModel {
 #[derive(Default)]
 struct State {
     guest_data: guest::GuestData,
+    host: Host,
+}
+
+#[derive(Default)]
+struct Host;
+
+impl host::Host for Host {
+    fn log_enabled(&mut self, metadata: host::LogMetadata<'_>) -> bool {
+        let metadata = log::Metadata::from(metadata);
+        log::logger().enabled(&metadata)
+    }
+
+    fn log(&mut self, metadata: host::LogMetadata<'_>, payload: host::LogRecord<'_>) {
+        // Note: we use the `log` crate for logging because `tracing` makes it
+        // incredibly hard to dynamically emit log messages that retain things
+        // like the line number and target.
+        //
+        // Luckily, tracing provide a compatibility layer where `log` records
+        // still make their way to a `tracing` subscriber.
+        //
+        // See also:
+        // - https://docs.rs/tracing/latest/tracing/#emitting-log-records
+        // - https://github.com/tokio-rs/tracing/issues/1047
+
+        let host::LogRecord {
+            message,
+            module_path,
+            file,
+            line,
+        } = payload;
+
+        log::logger().log(
+            &log::Record::builder()
+                .metadata(metadata.into())
+                .args(format_args!("{message}"))
+                .module_path(module_path)
+                .file(file)
+                .line(line)
+                .build(),
+        );
+    }
+}
+
+impl<'a> From<host::LogMetadata<'a>> for log::Metadata<'a> {
+    fn from(m: host::LogMetadata<'a>) -> Self {
+        let host::LogMetadata { level, target } = m;
+        log::Metadata::builder()
+            .level(level.into())
+            .target(target.into())
+            .build()
+    }
+}
+
+impl From<host::LogLevel> for log::Level {
+    fn from(level: host::LogLevel) -> Self {
+        match level {
+            host::LogLevel::Error => log::Level::Error,
+            host::LogLevel::Warn => log::Level::Warn,
+            host::LogLevel::Info => log::Level::Info,
+            host::LogLevel::Debug => log::Level::Debug,
+            host::LogLevel::Trace => log::Level::Trace,
+        }
+    }
 }
 
 impl Display for guest::Error {

@@ -461,6 +461,7 @@ dependencies = [
  "anyhow",
  "fj",
  "fj-plugins",
+ "log",
  "wasmtime",
  "wit-bindgen-wasmtime",
 ]

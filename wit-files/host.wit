@@ -15,7 +15,7 @@ record log-record {
     message: string,
     module-path: option<string>,
     file: option<string>,
-    line: option<string>,
+    line: option<u32>,
 }
 
 log-enabled: func(metadata: log-metadata) -> bool
