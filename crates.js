@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["anyhow","cuboid","fj","fj_proc","fornjot_plugins","once_cell","proc_macro2","quote","syn","thiserror","thiserror_impl","unicode_ident"];
+window.ALL_CRATES = ["anyhow","cfg_if","cuboid","fj","fj_plugins","fj_proc","once_cell","proc_macro2","quote","syn","thiserror","thiserror_impl","unicode_ident"];

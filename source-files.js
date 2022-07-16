@@ -1,9 +1,10 @@
 var sourcesIndex = {};
 sourcesIndex["anyhow"] = {"name":"","files":["backtrace.rs","chain.rs","context.rs","ensure.rs","error.rs","fmt.rs","kind.rs","lib.rs","macros.rs","ptr.rs","wrapper.rs"]};
+sourcesIndex["cfg_if"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["cuboid"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["fj"] = {"name":"","files":["angle.rs","group.rs","lib.rs","shape_2d.rs","sweep.rs","syntax.rs","transform.rs"]};
+sourcesIndex["fj_plugins"] = {"name":"","dirs":[{"name":"shim","files":["mod.rs","native.rs"]}],"files":["host.rs","lib.rs","model.rs"]};
 sourcesIndex["fj_proc"] = {"name":"","files":["lib.rs"]};
-sourcesIndex["fornjot_plugins"] = {"name":"","files":["lib.rs","shim.rs"]};
 sourcesIndex["once_cell"] = {"name":"","files":["imp_std.rs","lib.rs","race.rs"]};
 sourcesIndex["proc_macro2"] = {"name":"","files":["detection.rs","fallback.rs","lib.rs","marker.rs","parse.rs","wrapper.rs"]};
 sourcesIndex["quote"] = {"name":"","files":["ext.rs","format.rs","ident_fragment.rs","lib.rs","runtime.rs","spanned.rs","to_tokens.rs"]};

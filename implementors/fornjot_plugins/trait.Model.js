@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["cuboid"] = [{"text":"impl <a class=\"trait\" href=\"fornjot_plugins/trait.Model.html\" title=\"trait fornjot_plugins::Model\">Model</a> for <a class=\"struct\" href=\"cuboid/struct.Cuboid.html\" title=\"struct cuboid::Cuboid\">Cuboid</a>","synthetic":false,"types":["cuboid::Cuboid"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
