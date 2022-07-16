@@ -52,7 +52,7 @@ jobs:
           command: doc
           args: --all --verbose
       - name: Redirect top-level GitHub Pages
-        run: 'echo ''<meta http-equiv="refresh" content="0; url=fornjot_plugins/index.html" />'' > target/doc/index.html'
+        run: 'echo ''<meta http-equiv="refresh" content="0; url=fj_plugins/index.html" />'' > target/doc/index.html'
         shell: bash
       - name: Upload API Docs
         uses: JamesIves/github-pages-deploy-action@4.1.1

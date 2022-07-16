@@ -1,8 +1,15 @@
-use fj_plugins::{Context, HostExt, Model};
+use fj_plugins::{Context, HostExt, Model, PluginMetadata};
 
 // TODO: replace this with a custom attribute.
 fj_plugins::register_plugin!(|host| {
     host.register_model::<Cuboid>();
+
+    PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+        .set_short_description(env!("CARGO_PKG_DESCRIPTION"))
+        .set_repository(env!("CARGO_PKG_REPOSITORY"))
+        .set_homepage(env!("CARGO_PKG_HOMEPAGE"))
+        .set_license(env!("CARGO_PKG_LICENSE"))
+        .set_description(include_str!("../README.md"))
 });
 
 #[derive(Debug, Clone, PartialEq)]
