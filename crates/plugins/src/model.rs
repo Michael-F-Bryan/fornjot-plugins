@@ -59,6 +59,12 @@ pub trait ContextExt {
     where
         T: FromStr,
         T::Err: std::error::Error + Send + Sync + 'static;
+
+    /// Try to parse an argument, if it is present.
+    fn parse_optional_argument<T>(&self, name: &str) -> Result<Option<T>, ParseFailed>
+    where
+        T: FromStr,
+        T::Err: std::error::Error + Send + Sync + 'static;
 }
 
 impl<C: Context + ?Sized> ContextExt for C {
@@ -83,6 +89,25 @@ impl<C: Context + ?Sized> ContextExt for C {
                 error: Box::new(e),
             })
             .map_err(ContextError::from)
+    }
+
+    fn parse_optional_argument<T>(&self, name: &str) -> Result<Option<T>, ParseFailed>
+    where
+        T: FromStr,
+        T::Err: std::error::Error + Send + Sync + 'static,
+    {
+        let value = match self.get_argument(name) {
+            Some(value) => value,
+            None => return Ok(None),
+        };
+
+        let parsed = value.parse().map_err(|e| ParseFailed {
+            name: name.to_string(),
+            value: value.to_string(),
+            error: Box::new(e),
+        })?;
+
+        Ok(Some(parsed))
     }
 }
 

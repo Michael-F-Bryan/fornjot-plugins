@@ -20,7 +20,7 @@ target/release/libcuboid.so
 Once you've done that, Fornjot should be able to load it.
 
 ```console
-$ fj-app --model target/release/libcuboid.so
+$ fj-app --model ./models/cuboid
 ```
 
 ## License

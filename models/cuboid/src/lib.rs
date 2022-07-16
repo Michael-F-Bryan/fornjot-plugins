@@ -1,4 +1,4 @@
-use fj_plugins::{Context, HostExt, Model, PluginMetadata};
+use fj_plugins::{Context, ContextExt, HostExt, Model, PluginMetadata};
 
 // TODO: replace this with a custom attribute.
 fj_plugins::register_plugin!(|host| {
@@ -24,18 +24,9 @@ impl Model for Cuboid {
     where
         Self: Sized,
     {
-        let x: f64 = ctx
-            .get_argument("x")
-            .map(|arg| arg.parse().unwrap())
-            .unwrap_or(3.0);
-        let y: f64 = ctx
-            .get_argument("y")
-            .map(|arg| arg.parse().unwrap())
-            .unwrap_or(2.0);
-        let z: f64 = ctx
-            .get_argument("z")
-            .map(|arg| arg.parse().unwrap())
-            .unwrap_or(1.0);
+        let x: f64 = ctx.parse_optional_argument("x")?.unwrap_or(3.0);
+        let y: f64 = ctx.parse_optional_argument("y")?.unwrap_or(2.0);
+        let z: f64 = ctx.parse_optional_argument("z")?.unwrap_or(1.0);
 
         Ok(Cuboid { x, y, z })
     }
