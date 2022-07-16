@@ -53,16 +53,7 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
-<span id="50">50</span>
-<span id="51">51</span>
-<span id="52">52</span>
-<span id="53">53</span>
-<span id="54">54</span>
-<span id="55">55</span>
-<span id="56">56</span>
-<span id="57">57</span>
-<span id="58">58</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">PluginMetadata</span>};
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">ContextExt</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">PluginMetadata</span>};
 
 <span class="comment">// TODO: replace this with a custom attribute.</span>
 <span class="macro">fj_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> {
@@ -88,18 +79,9 @@
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
-        <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>
-            .<span class="ident">get_argument</span>(<span class="string">&quot;x&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> <span class="ident">arg</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_or</span>(<span class="number">3.0</span>);
-        <span class="kw">let</span> <span class="ident">y</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>
-            .<span class="ident">get_argument</span>(<span class="string">&quot;y&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> <span class="ident">arg</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_or</span>(<span class="number">2.0</span>);
-        <span class="kw">let</span> <span class="ident">z</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>
-            .<span class="ident">get_argument</span>(<span class="string">&quot;z&quot;</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">arg</span><span class="op">|</span> <span class="ident">arg</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>())
-            .<span class="ident">unwrap_or</span>(<span class="number">1.0</span>);
+        <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;x&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">3.0</span>);
+        <span class="kw">let</span> <span class="ident">y</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;y&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">2.0</span>);
+        <span class="kw">let</span> <span class="ident">z</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;z&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">1.0</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">Cuboid</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span> })
     }
