@@ -56,7 +56,7 @@
 mod host;
 mod metadata;
 mod model;
-mod shim;
+mod abi;
 
 pub use crate::{
     host::{Host, HostExt, ModelConstructor},

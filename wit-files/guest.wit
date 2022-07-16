@@ -1,0 +1,11 @@
+use { arguments, shape, error } from common
+
+resource model {
+    shape: func() -> shape
+}
+
+resource plugin {
+    load-model: func(args: arguments) -> expected<model, error>
+}
+
+init: func() -> expected<plugin, error>

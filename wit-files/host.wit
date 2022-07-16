@@ -1,0 +1,22 @@
+enum log-level {
+    error,
+    warn,
+    info,
+    debug,
+    trace,
+}
+
+record log-metadata {
+    level: log-level,
+    target: string,
+}
+
+record log-record {
+    message: string,
+    module-path: option<string>,
+    file: option<string>,
+    line: option<string>,
+}
+
+log-enabled: func(metadata: log-metadata) -> bool
+log: func(metadata: log-metadata, payload: log-record)

@@ -15,23 +15,32 @@ jobs:
           - 1.62.0
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: Type Check
+        uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all --verbose
-      - uses: actions-rs/cargo@v1
+          args: --workspace --verbose
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all --verbose
-      - uses: actions-rs/cargo@v1
+          args: --workspace --verbose
+      - name: Test
+        uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all --verbose
+          args: --workspace --verbose
+      - name: Compile to WebAssembly
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --package cuboid --verbose --target wasm32-unknown-unknown
 
   api-docs:
     name: Publish API Docs to GitHub Pages

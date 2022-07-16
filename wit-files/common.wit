@@ -1,0 +1,39 @@
+type arguments = list<tuple<string, string>>
+
+record circle {
+    radius: float64,
+}
+
+record poly-chain {
+    points: list<tuple<float64, float64>>,
+}
+
+variant chain {
+    circle(circle),
+    poly-chain(poly-chain),
+}
+
+record sketch {
+    chain: chain,
+    color: tuple<u8, u8, u8, u8>,
+}
+
+variant shape2d {
+    sketch(sketch),
+}
+
+record sweep {
+    shape: shape2d,
+    path: tuple<float64, float64, float64>,
+}
+
+variant shape {
+    shape2d(shape2d),
+    sweep(sweep),
+}
+
+record error {
+    message: string,
+    verbose-message: string,
+    causes: list<string>,
+}

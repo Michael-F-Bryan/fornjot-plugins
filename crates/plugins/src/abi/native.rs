@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
 
-use crate::{shim::fornjot_plugin_init, ModelConstructor};
+use crate::{abi::fornjot_plugin_init, ModelConstructor};
 
 static HOST: Lazy<Host> = Lazy::new(|| {
     let mut host = Host::default();
@@ -32,18 +32,10 @@ static HOST: Lazy<Host> = Lazy::new(|| {
 /// ... YOLO 🙃
 #[no_mangle]
 pub extern "C" fn model(args: &HashMap<String, String>) -> fj::Shape {
-    let ctx = Context(args);
+    let ctx = crate::abi::Context(args);
     let model = (HOST.constructor)(&ctx).expect("Unable to initialize the model");
 
     model.shape()
-}
-
-struct Context<'a>(&'a HashMap<String, String>);
-
-impl crate::Context for Context<'_> {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        self.0.get(name).map(|arg| arg.as_str())
-    }
 }
 
 struct Host {
@@ -54,7 +46,10 @@ impl Default for Host {
     fn default() -> Self {
         Self {
             constructor: |_| {
-                panic!("No model registered. Did you forget to call the register_plugin!() macro?")
+                Err(
+                    "No model registered. Did you forget to call the register_plugin!() macro?"
+                        .into(),
+                )
             },
         }
     }
