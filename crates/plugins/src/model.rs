@@ -3,11 +3,13 @@ use std::{
     str::FromStr,
 };
 
+use crate::Error;
+
 /// A model.
 pub trait Model {
     /// Try to initialize this [`Model`] using contextual information it has
     /// been provided.
-    fn from_context(ctx: &dyn Context) -> Result<Self, anyhow::Error>
+    fn from_context(ctx: &dyn Context) -> Result<Self, Error>
     where
         Self: Sized;
 

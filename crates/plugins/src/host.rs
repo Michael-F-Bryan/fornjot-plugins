@@ -1,6 +1,4 @@
-use anyhow::Error;
-
-use crate::Model;
+use crate::{Error, Model};
 
 /// A type-erased function that is called to construct a [`Model`].
 pub type ModelConstructor = fn(&dyn crate::Context) -> Result<Box<dyn Model>, Error>;

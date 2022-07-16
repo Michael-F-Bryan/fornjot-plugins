@@ -8,12 +8,12 @@
 //! 2. Calculate the model's shape
 //!
 //! ```rust
-//! use fj_plugins::{Model, Context};
+//! use fj_plugins::{Model, Context, Error};
 //!
 //! struct MyModel;
 //!
 //! impl Model for MyModel {
-//!     fn from_context(ctx: &dyn Context) -> Result<Self, anyhow::Error>
+//!     fn from_context(ctx: &dyn Context) -> Result<Self, Error>
 //!     where
 //!         Self: Sized,
 //!     {
@@ -30,16 +30,19 @@
 //!
 //! ```rust
 //! use fj_plugins::{Host, HostExt, PluginMetadata};
-//! # use fj_plugins::{Model, Context};
+//! # use fj_plugins::{Model, Context, Error};
 //!
 //! fj_plugins::register_plugin!(|host: &mut dyn Host| {
 //!     host.register_model::<MyModel>();
 //!
-//!     PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+//!     Ok(PluginMetadata::new(
+//!         env!("CARGO_PKG_NAME"),
+//!         env!("CARGO_PKG_VERSION"),
+//!     ))
 //! });
 //! # struct MyModel;
 //! # impl Model for MyModel {
-//! #   fn from_context(ctx: &dyn Context) -> Result<Self, anyhow::Error> where Self: Sized { todo!(); }
+//! #   fn from_context(ctx: &dyn Context) -> Result<Self, Error> where Self: Sized { todo!(); }
 //! #   fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
 //! # }
 //! ```
@@ -60,3 +63,6 @@ pub use crate::{
     metadata::PluginMetadata,
     model::{Context, ContextExt, MissingArgument, Model},
 };
+
+/// The common error type used by this crate.
+pub type Error = Box<dyn std::error::Error + Send + Sync + 'static>;

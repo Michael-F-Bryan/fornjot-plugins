@@ -86,7 +86,6 @@ dependencies = [
 name = "fj-plugins"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "cfg-if",
  "fj",
  "once_cell",

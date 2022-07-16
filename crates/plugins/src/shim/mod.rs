@@ -25,42 +25,27 @@ cfg_if::cfg_if! {
 extern "Rust" {
     /// The "entrypoint" for all plugins. This will be called once when the
     /// plugin is first loaded and the result will be cached.
-    pub(crate) fn fornjot_plugin_init(host: &mut dyn crate::Host) -> PluginMetadata;
+    pub(crate) fn fornjot_plugin_init(
+        host: &mut dyn crate::Host,
+    ) -> Result<PluginMetadata, Box<dyn std::error::Error + Send + Sync>>;
 }
 
 /// Declare the function that will be called when a plugin is first initialized.
 ///
 /// This is where you'll do things like registering a model with the host and so
 /// on.
-///
-/// ```rust
-/// use fj_plugins::{Host, HostExt, Model, Context, PluginMetadata};
-///
-/// fj_plugins::register_plugin!(|host: &mut dyn Host| {
-///     host.register_model::<MyModel>();
-///     PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
-/// });
-///
-/// struct MyModel;
-///
-/// impl Model for MyModel {
-///     fn from_context(ctx: &dyn Context) -> Result<Self, anyhow::Error>
-///     where
-///         Self: Sized,
-///     {
-///         todo!("Load arguments from the context and initialize the model");
-///     }
-///
-///     fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
-/// }
-/// ```
 #[macro_export]
 macro_rules! register_plugin {
     ($init:expr) => {
         #[no_mangle]
         #[doc(hidden)]
-        pub fn fornjot_plugin_init(host: &mut dyn $crate::Host) -> $crate::PluginMetadata {
-            let init: fn(&mut dyn $crate::Host) -> $crate::PluginMetadata = $init;
+        pub fn fornjot_plugin_init(
+            host: &mut dyn $crate::Host,
+        ) -> Result<$crate::PluginMetadata, $crate::Error> {
+            // Note: explicitly require a particular function signature.
+            let init: fn(&mut dyn $crate::Host) -> Result<$crate::PluginMetadata, $crate::Error> =
+                $init;
+
             init(host)
         }
     };

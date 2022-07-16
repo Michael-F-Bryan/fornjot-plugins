@@ -2,7 +2,7 @@
 
 [![Continuous integration](https://github.com/Michael-F-Bryan/fornjot-plugins/workflows/Continuous%20integration/badge.svg?branch=master)](https://github.com/Michael-F-Bryan/fornjot-plugins/actions)
 
-([API Docs])
+([API Docs][docs])
 
 A proof-of-concept plugin system for [Fornjot][fornjot].
 
@@ -22,6 +22,8 @@ Once you've done that, Fornjot should be able to load it.
 ```console
 $ fj-app --model ./models/cuboid
 ```
+
+Consult the [API docs][docs] for more detail on how the plugin system works.
 
 ## License
 
@@ -47,7 +49,7 @@ conditions.
 The intent of this crate is to be free of soundness bugs. The developers will
 do their best to avoid them, and welcome help in analysing and fixing them.
 
-[API Docs]: https://michael-f-bryan.github.io/fornjot-plugins
+[docs]: https://michael-f-bryan.github.io/fornjot-plugins
 [crev]: https://github.com/crev-dev/cargo-crev
 [fornjot]: https://www.fornjot.app/
 [rustup]: https://rustup.rs/

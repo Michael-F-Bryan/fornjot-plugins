@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-use anyhow::Context as _;
 use once_cell::sync::Lazy;
 
 use crate::{shim::fornjot_plugin_init, ModelConstructor};
@@ -10,11 +9,8 @@ static HOST: Lazy<Host> = Lazy::new(|| {
 
     // Safety: We use the register_plugin!() macro to ensure this function was
     // declared with the correct signature.
-    //
-    // If a downstream crate forgets to register their plugin then they're going
-    // to run into linker errors.
     unsafe {
-        fornjot_plugin_init(&mut host);
+        let _metadata = fornjot_plugin_init(&mut host).expect("Unable to initialize the plugin");
     }
 
     host
@@ -37,9 +33,7 @@ static HOST: Lazy<Host> = Lazy::new(|| {
 #[no_mangle]
 pub extern "C" fn model(args: &HashMap<String, String>) -> fj::Shape {
     let ctx = Context(args);
-    let model = (HOST.constructor)(&ctx)
-        .context("Unable to initialize the model")
-        .unwrap();
+    let model = (HOST.constructor)(&ctx).expect("Unable to initialize the model");
 
     model.shape()
 }

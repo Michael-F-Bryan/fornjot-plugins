@@ -4,12 +4,14 @@ use fj_plugins::{Context, ContextExt, HostExt, Model, PluginMetadata};
 fj_plugins::register_plugin!(|host| {
     host.register_model::<Cuboid>();
 
-    PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
-        .set_short_description(env!("CARGO_PKG_DESCRIPTION"))
-        .set_repository(env!("CARGO_PKG_REPOSITORY"))
-        .set_homepage(env!("CARGO_PKG_HOMEPAGE"))
-        .set_license(env!("CARGO_PKG_LICENSE"))
-        .set_description(include_str!("../README.md"))
+    Ok(
+        PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+            .set_short_description(env!("CARGO_PKG_DESCRIPTION"))
+            .set_repository(env!("CARGO_PKG_REPOSITORY"))
+            .set_homepage(env!("CARGO_PKG_HOMEPAGE"))
+            .set_license(env!("CARGO_PKG_LICENSE"))
+            .set_description(include_str!("../README.md")),
+    )
 });
 
 #[derive(Debug, Clone, PartialEq)]
@@ -20,7 +22,7 @@ pub struct Cuboid {
 }
 
 impl Model for Cuboid {
-    fn from_context(ctx: &dyn Context) -> Result<Self, anyhow::Error>
+    fn from_context(ctx: &dyn Context) -> Result<Self, fj_plugins::Error>
     where
         Self: Sized,
     {
