@@ -55,11 +55,25 @@
 <span id="49">49</span>
 <span id="50">50</span>
 <span id="51">51</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>};
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">PluginMetadata</span>};
 
 <span class="comment">// TODO: replace this with a custom attribute.</span>
 <span class="macro">fj_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> {
     <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">Cuboid</span><span class="op">&gt;</span>();
+
+    <span class="ident">PluginMetadata::new</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>), <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>))
+        .<span class="ident">set_short_description</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_DESCRIPTION&quot;</span>))
+        .<span class="ident">set_repository</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_REPOSITORY&quot;</span>))
+        .<span class="ident">set_homepage</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_HOMEPAGE&quot;</span>))
+        .<span class="ident">set_license</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_LICENSE&quot;</span>))
+        .<span class="ident">set_description</span>(<span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>))
 });
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>

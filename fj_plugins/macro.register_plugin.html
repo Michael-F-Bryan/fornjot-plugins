@@ -5,17 +5,18 @@
         </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In fj_plugins</a></h2></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../fj_plugins/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
                                 <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
                         </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Macro <a href="index.html">fj_plugins</a>::<wbr><a class="macro" href="#">register_plugin</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/fj_plugins/shim/mod.rs.html#57-66">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><div class="example-wrap"><pre class="rust macro"><code><span class="macro">macro_rules!</span> <span class="ident">register_plugin</span> {
+    <h1 class="fqn"><span class="in-band">Macro <a href="index.html">fj_plugins</a>::<wbr><a class="macro" href="#">register_plugin</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/fj_plugins/shim/mod.rs.html#58-67">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><div class="example-wrap"><pre class="rust macro"><code><span class="macro">macro_rules!</span> <span class="ident">register_plugin</span> {
     (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">init</span>:<span class="ident">expr</span>) =&gt; { ... };
 }</code></pre></div>
 </div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Declare the function that will be called when a plugin is first initialized.</p>
 <p>This is where you’ll do things like registering a model with the host and so
 on.</p>
-<h2 id="examples"><a href="#examples">Examples</a></h2>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Host</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">Context</span>};
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Host</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">Context</span>, <span class="ident">PluginMetadata</span>};
 
 <span class="macro">fj_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">Host</span><span class="op">|</span> {
     <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">MyModel</span><span class="op">&gt;</span>();
+    <span class="ident">PluginMetadata::new</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>), <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>))
 });
 
 <span class="kw">struct</span> <span class="ident">MyModel</span>;
