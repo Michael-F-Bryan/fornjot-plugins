@@ -58,7 +58,7 @@ macro_rules! register_plugin {
 pub(crate) struct Context<'a>(pub &'a HashMap<String, String>);
 
 impl crate::Context for Context<'_> {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        self.0.get(name).map(|arg| arg.as_str())
+    fn arguments(&self) -> &HashMap<String, String> {
+        self.0
     }
 }

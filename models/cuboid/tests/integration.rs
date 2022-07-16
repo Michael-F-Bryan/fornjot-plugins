@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::Path};
 use fj_host::{Model, Parameters};
 
 #[test]
-fn load_cuboid_and_generate_geometry() {
+fn load_native_cuboid_and_generate_geometry() {
     let crate_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
     let target_dir = crate_dir.parent().unwrap().parent().unwrap().join("target");
 

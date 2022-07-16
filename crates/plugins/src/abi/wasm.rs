@@ -40,7 +40,6 @@ impl guest::Plugin for Plugin {
     fn load_model(&self, args: Vec<(String, String)>) -> Result<Handle<Model>, guest::Error> {
         let args = args.into_iter().collect();
         let ctx = crate::abi::Context(&args);
-
         let model = (self.model_constructor)(&ctx)?;
 
         Ok(Handle::new(Model(model)))

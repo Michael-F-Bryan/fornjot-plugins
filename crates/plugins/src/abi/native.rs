@@ -45,12 +45,12 @@ struct Host {
 impl Default for Host {
     fn default() -> Self {
         Self {
-            constructor: |_| {
+            constructor: Box::new(|_| {
                 Err(
                     "No model registered. Did you forget to call the register_plugin!() macro?"
                         .into(),
                 )
-            },
+            }),
         }
     }
 }

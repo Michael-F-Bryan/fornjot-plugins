@@ -3,23 +3,25 @@
 //! The typical workflow is to first define a [`Model`] type. This comes with
 //! two main methods,
 //!
-//! 1. Load a model from the host context (typically by reading arguments
-//!    and parsing them into the correct type), and
-//! 2. Calculate the model's shape
+//! 1. Use the [`ModelFromContext`] trait to make the model loadable from the
+//!    host context, and
+//! 2. Calculate the model's shape with the [`Model`] trait
 //!
 //! ```rust
-//! use fj_plugins::{Model, Context, Error};
+//! use fj_plugins::{Model, Context, Error, ModelFromContext};
 //!
 //! struct MyModel;
 //!
-//! impl Model for MyModel {
+//! impl ModelFromContext for MyModel {
 //!     fn from_context(ctx: &dyn Context) -> Result<Self, Error>
 //!     where
 //!         Self: Sized,
 //!     {
 //!         todo!("Load arguments from the context and initialize the model");
 //!     }
+//! }
 //!
+//! impl Model for MyModel {
 //!     fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
 //! }
 //! ```
@@ -30,7 +32,7 @@
 //!
 //! ```rust
 //! use fj_plugins::{Host, HostExt, PluginMetadata};
-//! # use fj_plugins::{Model, Context, Error};
+//! # use fj_plugins::{Model, Context, Error, ModelFromContext};
 //!
 //! fj_plugins::register_plugin!(|host: &mut dyn Host| {
 //!     host.register_model::<MyModel>();
@@ -42,8 +44,10 @@
 //! });
 //! # struct MyModel;
 //! # impl Model for MyModel {
-//! #   fn from_context(ctx: &dyn Context) -> Result<Self, Error> where Self: Sized { todo!(); }
 //! #   fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
+//! # }
+//! # impl ModelFromContext for MyModel {
+//! #   fn from_context(ctx: &dyn Context) -> Result<Self, Error> where Self: Sized { todo!(); }
 //! # }
 //! ```
 
@@ -53,15 +57,15 @@
     missing_debug_implementations
 )]
 
+mod abi;
 mod host;
 mod metadata;
 mod model;
-mod abi;
 
 pub use crate::{
     host::{Host, HostExt, ModelConstructor},
     metadata::PluginMetadata,
-    model::{Context, ContextExt, MissingArgument, Model},
+    model::{Context, ContextExt, MissingArgument, Model, ModelFromContext},
 };
 
 /// The common error type used by this crate.

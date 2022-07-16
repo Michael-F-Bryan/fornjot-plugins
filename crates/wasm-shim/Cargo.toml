@@ -1,0 +1,16 @@
+[package]
+name = "fj-wasm-shim"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+anyhow = "1.0.58"
+fj = { git = "https://github.com/hannobraun/Fornjot" }
+fj-plugins = { version = "0.1.0", path = "../plugins" }
+wasmtime = "0.38.1"
+wit-bindgen-wasmtime = { git = "https://github.com/bytecodealliance/wit-bindgen" }

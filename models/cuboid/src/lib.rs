@@ -1,4 +1,4 @@
-use fj_plugins::{Context, ContextExt, HostExt, Model, PluginMetadata};
+use fj_plugins::{Context, ContextExt, HostExt, Model, ModelFromContext, PluginMetadata};
 
 // TODO: replace this with a custom attribute.
 fj_plugins::register_plugin!(|host| {
@@ -21,7 +21,7 @@ pub struct Cuboid {
     z: f64,
 }
 
-impl Model for Cuboid {
+impl ModelFromContext for Cuboid {
     fn from_context(ctx: &dyn Context) -> Result<Self, fj_plugins::Error>
     where
         Self: Sized,
@@ -32,7 +32,9 @@ impl Model for Cuboid {
 
         Ok(Cuboid { x, y, z })
     }
+}
 
+impl Model for Cuboid {
     fn shape(&self) -> fj::Shape {
         let Cuboid { x, y, z } = *self;
 

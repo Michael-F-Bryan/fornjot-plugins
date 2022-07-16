@@ -1,49 +1,47 @@
-use std::{
-    fmt::{self, Display, Formatter},
-    str::FromStr,
-};
+use std::{collections::HashMap, str::FromStr};
 
 use crate::Error;
 
 /// A model.
 pub trait Model {
-    /// Try to initialize this [`Model`] using contextual information it has
-    /// been provided.
-    fn from_context(ctx: &dyn Context) -> Result<Self, Error>
-    where
-        Self: Sized;
-
     /// Calculate this model's concrete geometry.
     fn shape(&self) -> fj::Shape;
 }
 
+/// A [`Model`] that can be loaded purely from the [`Context`].
+pub trait ModelFromContext: Sized {
+    /// Try to initialize this [`Model`] using contextual information it has
+    /// been provided.
+    fn from_context(ctx: &dyn Context) -> Result<Self, Error>;
+}
+
 /// Contextual information passed to a [`Model`] when it is being initialized.
 pub trait Context {
-    /// Get an argument that was passed to this model.
-    fn get_argument(&self, name: &str) -> Option<&str>;
+    /// The arguments dictionary associated with this [`Context`].
+    fn arguments(&self) -> &HashMap<String, String>;
 }
 
 impl<C: Context + ?Sized> Context for &'_ C {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        (*self).get_argument(name)
+    fn arguments(&self) -> &HashMap<String, String> {
+        (**self).arguments()
     }
 }
 
 impl<C: Context + ?Sized> Context for Box<C> {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        (**self).get_argument(name)
+    fn arguments(&self) -> &HashMap<String, String> {
+        (**self).arguments()
     }
 }
 
 impl<C: Context + ?Sized> Context for std::rc::Rc<C> {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        (**self).get_argument(name)
+    fn arguments(&self) -> &HashMap<String, String> {
+        (**self).arguments()
     }
 }
 
 impl<C: Context + ?Sized> Context for std::sync::Arc<C> {
-    fn get_argument(&self, name: &str) -> Option<&str> {
-        (**self).get_argument(name)
+    fn arguments(&self) -> &HashMap<String, String> {
+        (**self).arguments()
     }
 }
 
@@ -52,6 +50,9 @@ impl<C: Context + ?Sized> Context for std::sync::Arc<C> {
 /// By splitting these methods out into a separate trait, [`Context`] can stay
 /// object-safe while allowing convenience methods that use generics.
 pub trait ContextExt {
+    /// Get an argument that was passed to this model.
+    fn get_argument(&self, name: &str) -> Option<&str>;
+
     /// Get an argument, returning a [`MissingArgument`] error if it doesn't
     /// exist.
     fn get_required_argument(&self, name: &str) -> Result<&str, MissingArgument>;
@@ -70,6 +71,10 @@ pub trait ContextExt {
 }
 
 impl<C: Context + ?Sized> ContextExt for C {
+    fn get_argument(&self, name: &str) -> Option<&str> {
+        self.arguments().get(name).map(|s| s.as_str())
+    }
+
     fn get_required_argument(&self, name: &str) -> Result<&str, MissingArgument> {
         self.get_argument(name).ok_or_else(|| MissingArgument {
             name: name.to_string(),
@@ -123,37 +128,18 @@ pub enum ContextError {
 }
 
 /// The error returned when a required argument wasn't provided.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[error("The \"{name}\" argument is missing")]
 pub struct MissingArgument {
     /// The argument's name.
     pub name: String,
 }
 
-impl Display for MissingArgument {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let MissingArgument { name } = self;
-        write!(f, "The \"{name}\" argument is missing")
-    }
-}
-
-impl std::error::Error for MissingArgument {}
-
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
+#[error("Unable to parse the \"{name}\" argument (\"{value:?}\")")]
 pub struct ParseFailed {
     pub name: String,
     pub value: String,
+    #[source]
     pub error: Box<dyn std::error::Error + Send + Sync>,
-}
-
-impl Display for ParseFailed {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let ParseFailed { name, value, .. } = self;
-        write!(f, "Unable to parse the \"{name}\" argument (\"{value:?}\")")
-    }
-}
-
-impl std::error::Error for ParseFailed {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        Some(&*self.error)
-    }
 }
