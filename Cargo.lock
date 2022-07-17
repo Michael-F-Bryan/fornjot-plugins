@@ -387,7 +387,6 @@ dependencies = [
 name = "cuboid"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "fj 0.7.0 (git+https://github.com/hannobraun/Fornjot)",
  "fj-host",
  "fj-plugins",
@@ -542,7 +541,6 @@ dependencies = [
  "fj 0.7.0 (git+https://github.com/hannobraun/Fornjot)",
  "once_cell",
  "thiserror",
- "tracing",
  "tracing-subscriber",
  "wit-bindgen-rust",
 ]

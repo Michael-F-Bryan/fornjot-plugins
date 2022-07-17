@@ -36,7 +36,10 @@ extern "Rust" {
 /// Declare the function that will be called when a plugin is first initialized.
 ///
 /// This is where you'll do things like registering a model with the host and so
-/// on.
+/// on. The function should accept a [`&mut dyn Host`][crate::Host] and return
+/// a `Result<`[`PluginMetadata`]`,`[`Error`]`>`.
+///
+/// See [the crate docs][crate] for a more in-depth example.
 #[macro_export]
 macro_rules! register_plugin {
     ($init:expr) => {

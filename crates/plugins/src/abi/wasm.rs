@@ -1,4 +1,4 @@
-use crate::{ArgumentMetadata, Context, ModelMetadata, PluginMetadata};
+use crate::{ArgumentMetadata, ModelMetadata, PluginMetadata};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use std::{
     fmt,
