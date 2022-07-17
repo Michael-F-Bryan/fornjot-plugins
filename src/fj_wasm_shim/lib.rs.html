@@ -207,6 +207,7 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
 </pre><pre class="rust"><code><span class="doccomment">//! A wrapper plugin which makes the WebAssembly plugin pointed to by</span>
 <span class="doccomment">//! `$WASM_BINARY` and makes it callable using the native ABI.</span>
 
@@ -269,8 +270,9 @@
             .<span class="ident">collect</span>();
 
         <span class="comment">// HACK: It looks like wit-bindgen will unconditionally try to</span>
-        <span class="comment">// deallocate zero-length arrays, so we make sure there&#39;s at least 1</span>
-        <span class="comment">// argument in the list.</span>
+        <span class="comment">// deallocate zero-length arrays, which corrupts the allocator because</span>
+        <span class="comment">// zero-length arrays point to garbage (null + align_of&lt;T&gt;). To avoid</span>
+        <span class="comment">// this, we make sure there&#39;s at least 1 argument in the list.</span>
         <span class="ident">args</span>.<span class="ident">push</span>((<span class="string">&quot;&quot;</span>, <span class="string">&quot;&quot;</span>));
 
         <span class="kw">let</span> <span class="ident">model</span> <span class="op">=</span> <span class="ident">guest</span>
