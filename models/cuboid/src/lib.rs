@@ -2,7 +2,10 @@ use fj_plugins::{Context, ContextExt, HostExt, Model, ModelFromContext, PluginMe
 
 // TODO: replace this with a custom attribute.
 fj_plugins::register_plugin!(|host| {
+    let _span = tracing::info_span!("init").entered();
+
     host.register_model::<Cuboid>();
+    tracing::info!("Registered cuboid");
 
     Ok(
         PluginMetadata::new(env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
@@ -29,12 +32,14 @@ impl ModelFromContext for Cuboid {
         let x: f64 = ctx.parse_optional_argument("x")?.unwrap_or(3.0);
         let y: f64 = ctx.parse_optional_argument("y")?.unwrap_or(2.0);
         let z: f64 = ctx.parse_optional_argument("z")?.unwrap_or(1.0);
+        tracing::debug!(x, y, z, "Creating a cuboid model");
 
         Ok(Cuboid { x, y, z })
     }
 }
 
 impl Model for Cuboid {
+    #[tracing::instrument]
     fn shape(&self) -> fj::Shape {
         let Cuboid { x, y, z } = *self;
 

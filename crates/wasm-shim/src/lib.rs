@@ -4,6 +4,7 @@
 use std::{
     fmt::{self, Display, Formatter},
     sync::{Arc, Mutex},
+    time::SystemTime,
 };
 
 use anyhow::Context;
@@ -13,9 +14,17 @@ use wasmtime::{Engine, Linker, Module, Store};
 wit_bindgen_wasmtime::import!("../../wit-files/guest.wit");
 wit_bindgen_wasmtime::export!("../../wit-files/host.wit");
 
-fj_plugins::register_plugin!(|host| {
+fj_plugins::register_plugin!(init);
+
+fn init(host: &mut dyn fj_plugins::Host) -> Result<PluginMetadata, fj_plugins::Error> {
+    // Note: We need to initialize our own logger because we've been loaded by
+    // Fornjot at runtime with no way to access their `static` logger variable.
+    let _ = tracing_subscriber::fmt::try_init();
+
     let wasm_binary = std::env::var("WASM_BINARY")
         .context("Unable to read the $WASM_BINARY environment variable")?;
+
+    tracing::debug!(?wasm_binary, "Reading WebAssembly from disk");
 
     let wasm =
         std::fs::read(&wasm_binary).with_context(|| format!("Unable to read \"{wasm_binary}\""))?;
@@ -25,11 +34,15 @@ fj_plugins::register_plugin!(|host| {
     let mut store = Store::new(&engine, State::default());
     let mut linker = Linker::new(&engine);
     host::add_to_linker(&mut linker, |s: &mut State| &mut s.host)?;
+
+    tracing::debug!("Instantiating the WebAssembly module");
+
     let (guest, _instance) = guest::Guest::instantiate(&mut store, &module, &mut linker, |state| {
         &mut state.guest_data
     })
     .context("Unable to instantiate the WebAssembly module")?;
 
+    tracing::debug!("Initializing the plugin");
     let plugin = guest
         .init(&mut store)
         .context("Calling into WebAssembly triggered a trap")?
@@ -39,11 +52,17 @@ fj_plugins::register_plugin!(|host| {
     let guest = Arc::new(guest);
 
     host.register_model_constructor(Box::new(move |ctx| {
-        let args: Vec<_> = ctx
+        tracing::debug!(arguments=?ctx.arguments(), "Loading a model");
+        let mut args: Vec<_> = ctx
             .arguments()
             .iter()
             .map(|(k, v)| (k.as_str(), v.as_str()))
             .collect();
+
+        // HACK: It looks like wit-bindgen will unconditionally try to
+        // deallocate zero-length arrays, so we make sure there's at least 1
+        // argument in the list.
+        args.push(("", ""));
 
         let model = guest
             .plugin_load_model(&mut *store.lock().unwrap(), &plugin, &args)
@@ -61,7 +80,7 @@ fj_plugins::register_plugin!(|host| {
         env!("CARGO_PKG_NAME"),
         env!("CARGO_PKG_VERSION"),
     ))
-});
+}
 
 struct WebAssemblyModel {
     guest: Arc<guest::Guest<State>>,
@@ -94,60 +113,29 @@ struct State {
 struct Host;
 
 impl host::Host for Host {
-    fn log_enabled(&mut self, metadata: host::LogMetadata<'_>) -> bool {
-        let metadata = log::Metadata::from(metadata);
-        log::logger().enabled(&metadata)
+    fn print(&mut self, msg: &str) {
+        print!("{msg}");
     }
 
-    fn log(&mut self, metadata: host::LogMetadata<'_>, payload: host::LogRecord<'_>) {
-        // Note: we use the `log` crate for logging because `tracing` makes it
-        // incredibly hard to dynamically emit log messages that retain things
-        // like the line number and target.
-        //
-        // Luckily, tracing provide a compatibility layer where `log` records
-        // still make their way to a `tracing` subscriber.
-        //
-        // See also:
-        // - https://docs.rs/tracing/latest/tracing/#emitting-log-records
-        // - https://github.com/tokio-rs/tracing/issues/1047
-
-        let host::LogRecord {
-            message,
-            module_path,
-            file,
-            line,
-        } = payload;
-
-        log::logger().log(
-            &log::Record::builder()
-                .metadata(metadata.into())
-                .args(format_args!("{message}"))
-                .module_path(module_path)
-                .file(file)
-                .line(line)
-                .build(),
-        );
+    fn abort(&mut self, msg: &str) {
+        let err = anyhow::anyhow!("{msg}");
+        // SAFETY: This method will only ever be called by wit-bindgen-wasmtime
+        // so we'll always be within a WebAssembly context.
+        unsafe {
+            wasmtime_runtime::raise_user_trap(err);
+        }
     }
-}
 
-impl<'a> From<host::LogMetadata<'a>> for log::Metadata<'a> {
-    fn from(m: host::LogMetadata<'a>) -> Self {
-        let host::LogMetadata { level, target } = m;
-        log::Metadata::builder()
-            .level(level.into())
-            .target(target.into())
-            .build()
-    }
-}
+    fn time(&mut self) -> host::Timespec {
+        let delta = SystemTime::now()
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .expect("Current time is before the UNIX epoch");
 
-impl From<host::LogLevel> for log::Level {
-    fn from(level: host::LogLevel) -> Self {
-        match level {
-            host::LogLevel::Error => log::Level::Error,
-            host::LogLevel::Warn => log::Level::Warn,
-            host::LogLevel::Info => log::Level::Info,
-            host::LogLevel::Debug => log::Level::Debug,
-            host::LogLevel::Trace => log::Level::Trace,
+        host::Timespec {
+            secs: delta.as_secs() as i64,
+            // Note: Truncate to microseconds because we don't need 9
+            // significant figures for a timestamp.
+            nanos: 1000 * delta.subsec_micros() as u32,
         }
     }
 }

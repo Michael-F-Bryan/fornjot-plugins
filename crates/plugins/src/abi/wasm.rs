@@ -1,4 +1,10 @@
 use crate::{ModelConstructor, PluginMetadata};
+use chrono::{DateTime, NaiveDateTime, Utc};
+use std::{
+    fmt,
+    io::{self, Write},
+};
+use tracing_subscriber::fmt::{format::Writer, time::FormatTime};
 use wit_bindgen_rust::Handle;
 
 wit_bindgen_rust::import!("../../wit-files/host.wit");
@@ -8,6 +14,12 @@ pub struct Guest;
 
 impl guest::Guest for Guest {
     fn init() -> Result<Handle<Plugin>, guest::Error> {
+        tracing_subscriber::fmt()
+            .with_writer(make_writer)
+            .with_timer(SystemClock)
+            .init();
+        std::panic::set_hook(Box::new(panic_hook));
+
         let mut host = Host::default();
 
         let metadata = unsafe { crate::abi::fornjot_plugin_init(&mut host)? };
@@ -63,6 +75,46 @@ impl guest::Model for Model {
     fn shape(&self) -> guest::Shape {
         self.0.shape().into()
     }
+}
+
+fn make_writer() -> impl Write {
+    #[derive(Default)]
+    struct Writer(Vec<u8>);
+    impl Write for Writer {
+        fn write(&mut self, data: &[u8]) -> io::Result<usize> {
+            self.0.write(data)
+        }
+
+        fn flush(&mut self) -> io::Result<()> {
+            let s = String::from_utf8_lossy(&self.0);
+            host::print(&s);
+            self.0.clear();
+            Ok(())
+        }
+    }
+    impl Drop for Writer {
+        fn drop(&mut self) {
+            let _ = self.flush();
+        }
+    }
+
+    Writer::default()
+}
+
+struct SystemClock;
+
+impl FormatTime for SystemClock {
+    fn format_time(&self, w: &mut Writer<'_>) -> fmt::Result {
+        let host::Timespec { secs, nanos } = host::time();
+        let timestamp = NaiveDateTime::from_timestamp(secs, nanos);
+        let now: DateTime<Utc> = DateTime::from_utc(timestamp, Utc);
+        write!(w, "{now:?}")
+    }
+}
+
+fn panic_hook(info: &std::panic::PanicInfo<'_>) {
+    let msg = info.to_string();
+    host::abort(&msg);
 }
 
 impl From<crate::Error> for guest::Error {

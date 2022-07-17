@@ -1,22 +1,13 @@
-enum log-level {
-    error,
-    warn,
-    info,
-    debug,
-    trace,
+/// Write something to the console *without* appending a newline.
+print: func(message: string)
+
+/// Immediately halt execution with a message.
+abort: func(message: string)
+
+record timespec {
+    secs: s64,
+    nanos: u32,
 }
 
-record log-metadata {
-    level: log-level,
-    target: string,
-}
-
-record log-record {
-    message: string,
-    module-path: option<string>,
-    file: option<string>,
-    line: option<u32>,
-}
-
-log-enabled: func(metadata: log-metadata) -> bool
-log: func(metadata: log-metadata, payload: log-record)
+/// The amount of time that has passed since the UNIX epoch (UTC).
+time: func() -> timespec

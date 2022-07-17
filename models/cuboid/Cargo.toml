@@ -13,6 +13,7 @@ anyhow = "1.0.58"
 fj = { git = "https://github.com/hannobraun/Fornjot" }
 fj-plugins = { version = "0.1.0", path = "../../crates/plugins" }
 thiserror = "1.0.31"
+tracing = "0.1.35"
 
 [dev-dependencies]
 fj-host = { git = "https://github.com/hannobraun/Fornjot" }
