@@ -44,18 +44,7 @@
 <span id="38">38</span>
 <span id="39">39</span>
 <span id="40">40</span>
-<span id="41">41</span>
-<span id="42">42</span>
-<span id="43">43</span>
-<span id="44">44</span>
-<span id="45">45</span>
-<span id="46">46</span>
-<span id="47">47</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">model::ModelFromContext</span>, <span class="ident">Error</span>, <span class="ident">Model</span>};
-
-<span class="doccomment">/// A type-erased function that is called to construct a [`Model`].</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ModelConstructor</span> <span class="op">=</span>
-    <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident"><span class="kw">crate</span>::Context</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Model</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>;
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Model</span>;
 
 <span class="doccomment">/// An abstract interface to the Fornjot host.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Host</span> {
@@ -64,38 +53,35 @@
     <span class="doccomment">/// This is mainly for more advanced use cases (e.g. when you need to close</span>
     <span class="doccomment">/// over extra state to load the model). For simpler models, you probably</span>
     <span class="doccomment">/// want to use [`HostExt::register_model()`] instead.</span>
-    <span class="kw">fn</span> <span class="ident">register_model_constructor</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">constructor</span>: <span class="ident">ModelConstructor</span>);
+    <span class="kw">fn</span> <span class="ident">register_boxed_model</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">model</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Model</span><span class="op">&gt;</span>);
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Host</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Host</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="kw-2">mut</span> <span class="ident">H</span> {
-    <span class="kw">fn</span> <span class="ident">register_model_constructor</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">constructor</span>: <span class="ident">ModelConstructor</span>) {
-        (<span class="kw-2">*</span><span class="self">self</span>).<span class="ident">register_model_constructor</span>(<span class="ident">constructor</span>);
+    <span class="kw">fn</span> <span class="ident">register_boxed_model</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">model</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Model</span><span class="op">&gt;</span>) {
+        (<span class="kw-2">*</span><span class="self">self</span>).<span class="ident">register_boxed_model</span>(<span class="ident">model</span>);
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Host</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">Host</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">register_model_constructor</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">constructor</span>: <span class="ident">ModelConstructor</span>) {
-        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">register_model_constructor</span>(<span class="ident">constructor</span>);
+    <span class="kw">fn</span> <span class="ident">register_boxed_model</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">model</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Model</span><span class="op">&gt;</span>) {
+        (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">register_boxed_model</span>(<span class="ident">model</span>);
     }
 }
 
 <span class="doccomment">/// Extension methods to augment the [`Host`] API.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HostExt</span> {
     <span class="doccomment">/// Register a model with the Fornjot runtime.</span>
-    <span class="kw">fn</span> <span class="ident">register_model</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>)
+    <span class="kw">fn</span> <span class="ident">register_model</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">model</span>: <span class="ident">M</span>)
     <span class="kw">where</span>
-        <span class="ident">M</span>: <span class="ident">Model</span> <span class="op">+</span> <span class="ident">ModelFromContext</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>;
+        <span class="ident">M</span>: <span class="ident">Model</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Host</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">HostExt</span> <span class="kw">for</span> <span class="ident">H</span> {
-    <span class="kw">fn</span> <span class="ident">register_model</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>)
+    <span class="kw">fn</span> <span class="ident">register_model</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">model</span>: <span class="ident">M</span>)
     <span class="kw">where</span>
-        <span class="ident">M</span>: <span class="ident">Model</span> <span class="op">+</span> <span class="ident">ModelFromContext</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+        <span class="ident">M</span>: <span class="ident">Model</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     {
-        <span class="self">self</span>.<span class="ident">register_model_constructor</span>(<span class="ident">Box::new</span>(<span class="op">|</span><span class="ident">ctx</span><span class="op">|</span> {
-            <span class="kw">let</span> <span class="ident">model</span> <span class="op">=</span> <span class="ident">M::from_context</span>(<span class="ident">ctx</span>)<span class="question-mark">?</span>;
-            <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">model</span>))
-        }))
+        <span class="self">self</span>.<span class="ident">register_boxed_model</span>(<span class="ident">Box::new</span>(<span class="ident">model</span>));
     }
 }
 </code></pre></div>

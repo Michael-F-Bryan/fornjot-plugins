@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["cuboid"] = [{"text":"impl <a class=\"trait\" href=\"fj_plugins/model/trait.ModelFromContext.html\" title=\"trait fj_plugins::model::ModelFromContext\">ModelFromContext</a> for <a class=\"struct\" href=\"cuboid/struct.Cuboid.html\" title=\"struct cuboid::Cuboid\">Cuboid</a>","synthetic":false,"types":["cuboid::Cuboid"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

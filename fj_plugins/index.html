@@ -5,30 +5,36 @@
         </a><h2 class="location"><a href="#">Crate fj_plugins</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.1.0</li><li><a id="all-types" href="all.html">All Items</a></li></ul></div><section><div class="block"><ul><li><a href="#macros">Macros</a></li><li><a href="#structs">Structs</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../fj_plugins/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
                                 <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
                         </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">fj_plugins</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/fj_plugins/lib.rs.html#1-72">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Abstractions for defining your own Fornjot plugins.</p>
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">fj_plugins</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/fj_plugins/lib.rs.html#1-76">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Abstractions for defining your own Fornjot plugins.</p>
 <p>The typical workflow is to first define a <a href="trait.Model.html" title="Model"><code>Model</code></a> type. This comes with
 two main methods,</p>
 <ol>
-<li>Use the <a href="trait.ModelFromContext.html" title="ModelFromContext"><code>ModelFromContext</code></a> trait to make the model loadable from the
-host context, and</li>
-<li>Calculate the model’s shape with the <a href="trait.Model.html" title="Model"><code>Model</code></a> trait</li>
+<li>Getting metadata about the model, and</li>
+<li>Calculating the model’s geometry using arguments from the host context</li>
 </ol>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Model</span>, <span class="ident">Context</span>, <span class="ident">Error</span>, <span class="ident">ModelFromContext</span>};
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Model</span>, <span class="ident">Context</span>, <span class="ident">ContextExt</span>, <span class="ident">Error</span>, <span class="ident">ModelMetadata</span>, <span class="ident">ArgumentMetadata</span>};
+<span class="kw">use</span> <span class="ident">fj</span>::{<span class="ident">Shape</span>, <span class="ident">Circle</span>, <span class="ident">Sketch</span>, <span class="ident">syntax</span>::<span class="kw-2">*</span>};
 
-<span class="kw">struct</span> <span class="ident">MyModel</span>;
+<span class="kw">struct</span> <span class="ident">Cylinder</span>;
 
-<span class="kw">impl</span> <span class="ident">ModelFromContext</span> <span class="kw">for</span> <span class="ident">MyModel</span> {
-    <span class="kw">fn</span> <span class="ident">from_context</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Context</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
-    <span class="kw">where</span>
-        <span class="self">Self</span>: <span class="ident">Sized</span>,
-    {
-        <span class="macro">todo!</span>(<span class="string">&quot;Load arguments from the context and initialize the model&quot;</span>);
+<span class="kw">impl</span> <span class="ident">Model</span> <span class="kw">for</span> <span class="ident">Cylinder</span> {
+    <span class="kw">fn</span> <span class="ident">metadata</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ModelMetadata</span> {
+        <span class="ident">ModelMetadata::new</span>(<span class="string">&quot;Cylinder&quot;</span>)
+            .<span class="ident">with_argument</span>(<span class="string">&quot;radius&quot;</span>)
+            .<span class="ident">with_argument</span>(
+                <span class="ident">ArgumentMetadata::new</span>(<span class="string">&quot;height&quot;</span>)
+                    .<span class="ident">with_default_value</span>(<span class="string">&quot;10.0&quot;</span>),
+            )
     }
-}
 
-<span class="kw">impl</span> <span class="ident">Model</span> <span class="kw">for</span> <span class="ident">MyModel</span> {
-    <span class="kw">fn</span> <span class="ident">shape</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">fj::Shape</span> { <span class="macro">todo!</span>(<span class="string">&quot;Calcualte the model&#39;s geometry&quot;</span>) }
+    <span class="kw">fn</span> <span class="ident">shape</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Context</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Shape</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    {
+        <span class="kw">let</span> <span class="ident">radius</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_argument</span>(<span class="string">&quot;radius&quot;</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">height</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;height&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">10.0</span>);
+        <span class="kw">let</span> <span class="ident">circle</span> <span class="op">=</span> <span class="ident">Circle::from_radius</span>(<span class="ident">radius</span>);
+        <span class="prelude-val">Ok</span>(<span class="ident">Sketch::from_circle</span>(<span class="ident">circle</span>).<span class="ident">sweep</span>([<span class="ident">height</span>, <span class="number">0.0</span>, <span class="number">0.0</span>]).<span class="ident">into</span>())
+    }
 }</code></pre></div>
 <p>Once you’ve done that, you can use the <a href="macro.register_plugin.html" title="register_plugin!()"><code>register_plugin!()</code></a> macro to
 set up the plugin (possibly registering a model) and tell the host some
@@ -37,7 +43,7 @@ basic information about it.</p>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Host</span>, <span class="ident">HostExt</span>, <span class="ident">PluginMetadata</span>};
 
 <span class="macro">fj_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span>: <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">Host</span><span class="op">|</span> {
-    <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">MyModel</span><span class="op">&gt;</span>();
+    <span class="ident">host</span>.<span class="ident">register_model</span>(<span class="ident">Cylinder</span>);
 
     <span class="prelude-val">Ok</span>(<span class="ident">PluginMetadata::new</span>(
         <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>),
@@ -47,8 +53,8 @@ basic information about it.</p>
 </div></details><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.register_plugin.html" title="fj_plugins::register_plugin macro">register_plugin</a></div><div class="item-right docblock-short"><p>Declare the function that will be called when a plugin is first initialized.</p>
 </div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
-<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.MissingArgument.html" title="fj_plugins::MissingArgument struct">MissingArgument</a></div><div class="item-right docblock-short"><p>The error returned when a required argument wasn’t provided.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PluginMetadata.html" title="fj_plugins::PluginMetadata struct">PluginMetadata</a></div><div class="item-right docblock-short"><p>Information about a particular plugin that can be used by the host for
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ArgumentMetadata.html" title="fj_plugins::ArgumentMetadata struct">ArgumentMetadata</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.MissingArgument.html" title="fj_plugins::MissingArgument struct">MissingArgument</a></div><div class="item-right docblock-short"><p>The error returned when a required argument wasn’t provided.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ModelMetadata.html" title="fj_plugins::ModelMetadata struct">ModelMetadata</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PluginMetadata.html" title="fj_plugins::PluginMetadata struct">PluginMetadata</a></div><div class="item-right docblock-short"><p>Information about a particular plugin that can be used by the host for
 things like introspection and search.</p>
 </div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Context.html" title="fj_plugins::Context trait">Context</a></div><div class="item-right docblock-short"><p>Contextual information passed to a <a href="trait.Model.html" title="Model"><code>Model</code></a> when it is being initialized.</p>
@@ -56,9 +62,7 @@ things like introspection and search.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Host.html" title="fj_plugins::Host trait">Host</a></div><div class="item-right docblock-short"><p>An abstract interface to the Fornjot host.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.HostExt.html" title="fj_plugins::HostExt trait">HostExt</a></div><div class="item-right docblock-short"><p>Extension methods to augment the <a href="trait.Host.html" title="Host"><code>Host</code></a> API.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Model.html" title="fj_plugins::Model trait">Model</a></div><div class="item-right docblock-short"><p>A model.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.ModelFromContext.html" title="fj_plugins::ModelFromContext trait">ModelFromContext</a></div><div class="item-right docblock-short"><p>A <a href="trait.Model.html" title="Model"><code>Model</code></a> that can be loaded purely from the <a href="trait.Context.html" title="Context"><code>Context</code></a>.</p>
 </div></div></div><h2 id="types" class="small-section-header"><a href="#types">Type Definitions</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="type" href="type.Error.html" title="fj_plugins::Error type">Error</a></div><div class="item-right docblock-short"><p>The common error type used by this crate.</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="type" href="type.ModelConstructor.html" title="fj_plugins::ModelConstructor type">ModelConstructor</a></div><div class="item-right docblock-short"><p>A type-erased function that is called to construct a <a href="trait.Model.html" title="Model"><code>Model</code></a>.</p>
 </div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="fj_plugins" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (d5e7f4782 2022-07-16)" ></div>
 </body></html>
