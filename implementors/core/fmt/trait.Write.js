@@ -1,0 +1,5 @@
+(function() {var implementors = {};
+implementors["tracing_subscriber"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html\" title=\"trait core::fmt::Write\">Write</a> for <a class=\"struct\" href=\"tracing_subscriber/fmt/format/struct.Writer.html\" title=\"struct tracing_subscriber::fmt::format::Writer\">Writer</a>&lt;'_&gt;","synthetic":false,"types":["tracing_subscriber::fmt::format::Writer"]}];
+implementors["wasmtime_environ"] = [];
+implementors["wit_bindgen_gen_core"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html\" title=\"trait core::fmt::Write\">Write</a> for <a class=\"struct\" href=\"wit_bindgen_gen_core/struct.Source.html\" title=\"struct wit_bindgen_gen_core::Source\">Source</a>","synthetic":false,"types":["wit_bindgen_gen_core::Source"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

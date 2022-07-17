@@ -53,18 +53,32 @@
 <span id="47">47</span>
 <span id="48">48</span>
 <span id="49">49</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">ContextExt</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">PluginMetadata</span>};
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">fj_plugins</span>::{<span class="ident">Context</span>, <span class="ident">ContextExt</span>, <span class="ident">HostExt</span>, <span class="ident">Model</span>, <span class="ident">ModelFromContext</span>, <span class="ident">PluginMetadata</span>};
 
 <span class="comment">// TODO: replace this with a custom attribute.</span>
 <span class="macro">fj_plugins::register_plugin!</span>(<span class="op">|</span><span class="ident">host</span><span class="op">|</span> {
-    <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">Cuboid</span><span class="op">&gt;</span>();
+    <span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="macro">tracing::info_span!</span>(<span class="string">&quot;init&quot;</span>).<span class="ident">entered</span>();
 
-    <span class="ident">PluginMetadata::new</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>), <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>))
-        .<span class="ident">set_short_description</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_DESCRIPTION&quot;</span>))
-        .<span class="ident">set_repository</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_REPOSITORY&quot;</span>))
-        .<span class="ident">set_homepage</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_HOMEPAGE&quot;</span>))
-        .<span class="ident">set_license</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_LICENSE&quot;</span>))
-        .<span class="ident">set_description</span>(<span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>))
+    <span class="ident">host</span>.<span class="ident">register_model</span>::<span class="op">&lt;</span><span class="ident">Cuboid</span><span class="op">&gt;</span>();
+    <span class="macro">tracing::info!</span>(<span class="string">&quot;Registered cuboid&quot;</span>);
+
+    <span class="prelude-val">Ok</span>(
+        <span class="ident">PluginMetadata::new</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>), <span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_VERSION&quot;</span>))
+            .<span class="ident">set_short_description</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_DESCRIPTION&quot;</span>))
+            .<span class="ident">set_repository</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_REPOSITORY&quot;</span>))
+            .<span class="ident">set_homepage</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_HOMEPAGE&quot;</span>))
+            .<span class="ident">set_license</span>(<span class="macro">env!</span>(<span class="string">&quot;CARGO_PKG_LICENSE&quot;</span>))
+            .<span class="ident">set_description</span>(<span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)),
+    )
 });
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>)]</span>
@@ -74,18 +88,22 @@
     <span class="ident">z</span>: <span class="ident">f64</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">Model</span> <span class="kw">for</span> <span class="ident">Cuboid</span> {
-    <span class="kw">fn</span> <span class="ident">from_context</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Context</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">anyhow::Error</span><span class="op">&gt;</span>
+<span class="kw">impl</span> <span class="ident">ModelFromContext</span> <span class="kw">for</span> <span class="ident">Cuboid</span> {
+    <span class="kw">fn</span> <span class="ident">from_context</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Context</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">fj_plugins::Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
         <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;x&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">3.0</span>);
         <span class="kw">let</span> <span class="ident">y</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;y&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">2.0</span>);
         <span class="kw">let</span> <span class="ident">z</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">parse_optional_argument</span>(<span class="string">&quot;z&quot;</span>)<span class="question-mark">?</span>.<span class="ident">unwrap_or</span>(<span class="number">1.0</span>);
+        <span class="macro">tracing::debug!</span>(<span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span>, <span class="string">&quot;Creating a cuboid model&quot;</span>);
 
         <span class="prelude-val">Ok</span>(<span class="ident">Cuboid</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span> })
     }
+}
 
+<span class="kw">impl</span> <span class="ident">Model</span> <span class="kw">for</span> <span class="ident">Cuboid</span> {
+    <span class="attribute">#[<span class="ident">tracing::instrument</span>]</span>
     <span class="kw">fn</span> <span class="ident">shape</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">fj::Shape</span> {
         <span class="kw">let</span> <span class="ident">Cuboid</span> { <span class="ident">x</span>, <span class="ident">y</span>, <span class="ident">z</span> } <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>;
 
@@ -103,5 +121,5 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cuboid" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (23e21bdd2 2022-07-15)" ></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cuboid" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (d5e7f4782 2022-07-16)" ></div>
 </body></html>

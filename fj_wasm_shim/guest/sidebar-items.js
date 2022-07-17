@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["Chain",""],["Shape",""],["Shape2d",""]],"struct":[["Circle",""],["Error",""],["Guest",""],["GuestData","Auxiliary data associated with the wasm exports."],["Model",""],["Plugin",""],["PolyChain",""],["Sketch",""],["Sweep",""]],"type":[["Arguments",""]]};

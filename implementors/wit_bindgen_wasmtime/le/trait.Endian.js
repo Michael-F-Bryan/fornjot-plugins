@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["fj_wasm_shim"] = [{"text":"impl <a class=\"trait\" href=\"wit_bindgen_wasmtime/le/trait.Endian.html\" title=\"trait wit_bindgen_wasmtime::le::Endian\">Endian</a> for <a class=\"struct\" href=\"fj_wasm_shim/guest/struct.Circle.html\" title=\"struct fj_wasm_shim::guest::Circle\">Circle</a>","synthetic":false,"types":["fj_wasm_shim::guest::Circle"]},{"text":"impl <a class=\"trait\" href=\"wit_bindgen_wasmtime/le/trait.Endian.html\" title=\"trait wit_bindgen_wasmtime::le::Endian\">Endian</a> for <a class=\"struct\" href=\"fj_wasm_shim/host/struct.Timespec.html\" title=\"struct fj_wasm_shim::host::Timespec\">Timespec</a>","synthetic":false,"types":["fj_wasm_shim::host::Timespec"]}];
+implementors["wit_bindgen_wasmtime"] = [];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
