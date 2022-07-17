@@ -38,3 +38,13 @@ impl<H: Host + ?Sized> HostExt for H {
         self.register_boxed_model(Box::new(model));
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn host_is_object_safe() {
+        let _: &dyn Host;
+    }
+}

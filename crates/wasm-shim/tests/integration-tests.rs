@@ -3,7 +3,7 @@ use fj_host::Parameters;
 use std::{collections::HashMap, path::Path};
 
 #[test]
-fn load_the_cuboid_model() {
+fn load_the_cuboid_model_through_fornjot() {
     // Compile cuboid.wasm
     Command::new(env!("CARGO"))
         .args([
@@ -23,7 +23,7 @@ fn load_the_cuboid_model() {
         .join("debug")
         .join("cuboid.wasm");
     assert!(binary.exists(), "{binary:?} should exist");
-    std::env::set_var("WASM_BINARY", &binary);
+    std::env::set_var(fj_wasm_shim::ENV_NAME, &binary);
 
     let model = fj_host::Model::from_path(crate_dir.to_path_buf(), Some(target_dir)).unwrap();
 

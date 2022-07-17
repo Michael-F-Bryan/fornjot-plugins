@@ -18,6 +18,7 @@ impl guest::Guest for Guest {
         tracing_subscriber::fmt()
             .with_writer(make_writer)
             .with_timer(SystemClock)
+            .with_env_filter(host::log_filter().unwrap_or_default())
             .init();
         std::panic::set_hook(Box::new(panic_hook));
 

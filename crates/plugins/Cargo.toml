@@ -13,5 +13,5 @@ thiserror = "1.0.31"
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 wit-bindgen-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
-tracing-subscriber = "0.3.14"
+tracing-subscriber = { version = "0.3.14", features = ["env-filter"] }
 chrono = "0.4.19"

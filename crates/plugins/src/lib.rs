@@ -29,6 +29,7 @@
 //!     {
 //!         let radius = ctx.parse_argument("radius")?;
 //!         let height = ctx.parse_optional_argument("height")?.unwrap_or(10.0);
+//!
 //!         let circle = Circle::from_radius(radius);
 //!         Ok(Sketch::from_circle(circle).sweep([height, 0.0, 0.0]).into())
 //!     }
@@ -85,14 +86,16 @@
 )]
 
 mod abi;
+mod context;
 mod host;
 mod metadata;
 mod model;
 
 pub use crate::{
+    context::{Context, ContextError, ContextExt, MissingArgument, ParseFailed},
     host::{Host, HostExt},
     metadata::{ArgumentMetadata, ModelMetadata, PluginMetadata},
-    model::{Context, ContextExt, MissingArgument, Model},
+    model::Model,
 };
 
 /// The common error type used by this crate.

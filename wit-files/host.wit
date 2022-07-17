@@ -11,3 +11,7 @@ record timespec {
 
 /// The amount of time that has passed since the UNIX epoch (UTC).
 time: func() -> timespec
+
+/// A string which can be used to filter log messages. This typically comes
+/// from the `$RUST_LOG` environment variable.
+log-filter: func() -> option<string>

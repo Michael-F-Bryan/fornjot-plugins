@@ -1,8 +1,9 @@
 //! A wrapper plugin which makes the WebAssembly plugin pointed to by
-//! `$WASM_BINARY` and makes it callable using the native ABI.
+//! `$FJ_WASM_PLUGIN` and makes it callable using the native ABI.
 
 use std::{
     fmt::{self, Display, Formatter},
+    path::Path,
     sync::{Arc, Mutex},
     time::SystemTime,
 };
@@ -14,55 +15,107 @@ use wasmtime::{Engine, Linker, Module, Store};
 wit_bindgen_wasmtime::import!("../../wit-files/guest.wit");
 wit_bindgen_wasmtime::export!("../../wit-files/host.wit");
 
-fj_plugins::register_plugin!(init);
+pub const ENV_NAME: &str = "FJ_WASM_PLUGIN";
 
-fn init(host: &mut dyn fj_plugins::Host) -> Result<PluginMetadata, fj_plugins::Error> {
-    // Note: We need to initialize our own logger because we've been loaded by
-    // Fornjot at runtime with no way to access their `static` logger variable.
+fj_plugins::register_plugin!(|host| {
+    // Note: This library has been compiled as its own self-contained cdylib,
+    // complete with our own static variables, meaning the logger in our version
+    // of tracing isn't related to the logger set up by Fornjot.
     let _ = tracing_subscriber::fmt::try_init();
 
-    let wasm_binary = std::env::var("WASM_BINARY")
-        .context("Unable to read the $WASM_BINARY environment variable")?;
+    let wasm_binary = std::env::var(ENV_NAME)
+        .with_context(|| format!("Unable to read the ${ENV_NAME} environment variable"))?;
 
-    tracing::debug!(?wasm_binary, "Reading WebAssembly from disk");
+    let plugin = Plugin::load(&wasm_binary)?;
 
-    let wasm =
-        std::fs::read(&wasm_binary).with_context(|| format!("Unable to read \"{wasm_binary}\""))?;
-
-    let engine = Engine::default();
-    let module = Module::new(&engine, &wasm).context("Unable to parse the WebAssembly module")?;
-    let mut store = Store::new(&engine, State::default());
-    let mut linker = Linker::new(&engine);
-    host::add_to_linker(&mut linker, |s: &mut State| &mut s.host)?;
-
-    tracing::debug!("Instantiating the WebAssembly module");
-
-    let (guest, _instance) = guest::Guest::instantiate(&mut store, &module, &mut linker, |state| {
-        &mut state.guest_data
-    })
-    .context("Unable to instantiate the WebAssembly module")?;
-
-    tracing::debug!("Initializing the plugin");
-    let plugin = guest
-        .init(&mut store)?
-        .context("Unable to initialize the plugin")?;
-
-    let store = Arc::new(Mutex::new(store));
-    let guest = Arc::new(guest);
-
-    for model in guest.plugin_models(&mut *store.lock().unwrap(), &plugin)? {
-        let model = WebAssemblyModel {
-            guest: Arc::clone(&guest),
-            store: Arc::clone(&store),
-            model,
-        };
+    for model in plugin.models()? {
         host.register_model(model);
     }
 
-    Ok(PluginMetadata::new(
-        env!("CARGO_PKG_NAME"),
-        env!("CARGO_PKG_VERSION"),
-    ))
+    Ok(plugin.metadata())
+});
+
+/// The instantiated WebAssembly module that implements a Fornjot plugin.
+pub struct Plugin {
+    store: Arc<Mutex<Store<State>>>,
+    guest: Arc<guest::Guest<State>>,
+    plugin: guest::Plugin,
+}
+
+impl Plugin {
+    /// Load the [`Plugin`] from disk.
+    pub fn load(path: impl AsRef<Path>) -> Result<Plugin, fj_plugins::Error> {
+        let path = path.as_ref();
+        tracing::debug!(path = %path.display(), "Reading WebAssembly from disk");
+
+        let wasm = std::fs::read(&path)
+            .with_context(|| format!("Unable to read \"{}\"", path.display()))?;
+
+        Plugin::from_memory(&wasm)
+    }
+
+    fn from_memory(wasm: &[u8]) -> Result<Plugin, fj_plugins::Error> {
+        let engine = Engine::default();
+
+        tracing::debug!("Parsing the WebAssembly module");
+        let module =
+            Module::new(&engine, wasm).context("Unable to parse the WebAssembly module")?;
+
+        let mut store = Store::new(&engine, State::default());
+        let mut linker = Linker::new(&engine);
+        host::add_to_linker(&mut linker, |s: &mut State| &mut s.host)?;
+
+        tracing::debug!("Instantiated the WebAssembly module");
+        let (guest, _instance) =
+            guest::Guest::instantiate(&mut store, &module, &mut linker, |state| {
+                &mut state.guest_data
+            })
+            .context("Unable to instantiate the WebAssembly module")?;
+
+        tracing::debug!("Initializing the plugin");
+        let plugin = guest
+            .init(&mut store)?
+            .context("Unable to initialize the plugin")?;
+
+        Ok(Plugin {
+            plugin,
+            store: Arc::new(Mutex::new(store)),
+            guest: Arc::new(guest),
+        })
+    }
+
+    pub fn metadata(&self) -> PluginMetadata {
+        let Plugin {
+            store,
+            guest,
+            plugin,
+        } = self;
+
+        guest
+            .plugin_metadata(&mut *store.lock().unwrap(), plugin)
+            .unwrap()
+            .into()
+    }
+
+    pub fn models(&self) -> Result<Vec<impl Model>, fj_plugins::Error> {
+        let Plugin {
+            store,
+            guest,
+            plugin,
+        } = self;
+
+        let models = guest
+            .plugin_models(&mut *store.lock().unwrap(), &plugin)?
+            .into_iter()
+            .map(|model| WebAssemblyModel {
+                guest: Arc::clone(&guest),
+                store: Arc::clone(&store),
+                model,
+            })
+            .collect();
+
+        Ok(models)
+    }
 }
 
 struct WebAssemblyModel {
@@ -147,6 +200,10 @@ impl host::Host for Host {
             // significant figures for a timestamp.
             nanos: 1000 * delta.subsec_micros() as u32,
         }
+    }
+
+    fn log_filter(&mut self) -> Option<String> {
+        std::env::var("RUST_LOG").ok()
     }
 }
 
@@ -238,6 +295,30 @@ impl From<guest::ArgumentMetadata> for ArgumentMetadata {
             name,
             description,
             default_value,
+        }
+    }
+}
+
+impl From<guest::PluginMetadata> for PluginMetadata {
+    fn from(m: guest::PluginMetadata) -> Self {
+        let guest::PluginMetadata {
+            name,
+            version,
+            short_description,
+            description,
+            homepage,
+            repository,
+            license,
+        } = m;
+
+        PluginMetadata {
+            name,
+            version,
+            short_description,
+            description,
+            homepage,
+            repository,
+            license,
         }
     }
 }
