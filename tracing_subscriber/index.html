@@ -42,7 +42,7 @@ information on using <a href="layer/trait.Filter.html"><code>Filter</code></a>s.
 <li><code>std</code>: Enables APIs that depend on the on the Rust standard library
 (enabled by default).</li>
 <li><code>alloc</code>: Depend on <a href="https://doc.rust-lang.org/nightly/alloc/index.html"><code>liballoc</code></a> (enabled by “std”).</li>
-<li><code>env-filter</code>: Enables the <a href="filter::EnvFilter"><code>EnvFilter</code></a> type, which implements filtering
+<li><code>env-filter</code>: Enables the <a href="filter/struct.EnvFilter.html"><code>EnvFilter</code></a> type, which implements filtering
 similar to the <a href="https://crates.io/crates/env_logger"><code>env_logger</code> crate</a>. <strong>Requires “std”</strong>.</li>
 <li><code>fmt</code>: Enables the <a href="fmt/index.html"><code>fmt</code></a> module, which provides a subscriber
 implementation for printing formatted representations of trace events.
@@ -71,7 +71,7 @@ rather than the Rust standard library’s implementation.</li>
 <p>In embedded systems and other bare-metal applications, <code>tracing</code> can be
 used without requiring the Rust standard library, although some features are
 disabled. Although most of the APIs provided by <code>tracing-subscriber</code>, such
-as <a href="fmt/index.html"><code>fmt</code></a> and <a href="filter::EnvFilter"><code>EnvFilter</code></a>, require the standard library, some
+as <a href="fmt/index.html"><code>fmt</code></a> and <a href="filter/struct.EnvFilter.html"><code>EnvFilter</code></a>, require the standard library, some
 functionality, such as the <a href="layer/trait.Layer.html"><code>Layer</code></a> trait, can still be used in
 <code>no_std</code> environments.</p>
 <p>The dependency on the standard library is controlled by two crate feature
@@ -122,7 +122,9 @@ subscriber.</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="util/index.html" title="tracing_subscriber::util mod">util</a></div><div class="item-right docblock-short"><p>Extension traits and other utilities to make working with subscribers more
 ergonomic.</p>
 </div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
-<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Registry.html" title="tracing_subscriber::Registry struct">Registry</a></div><div class="item-right docblock-short"><p>A shared, reusable store for spans.</p>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.EnvFilter.html" title="tracing_subscriber::EnvFilter struct">EnvFilter</a></div><div class="item-right docblock-short"><p>A <a href="layer/trait.Layer.html" title="Layer"><code>Layer</code></a> which filters spans and events based on a set of filter
+directives.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Registry.html" title="tracing_subscriber::Registry struct">Registry</a></div><div class="item-right docblock-short"><p>A shared, reusable store for spans.</p>
 </div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.registry.html" title="tracing_subscriber::registry fn">registry</a></div><div class="item-right docblock-short"></div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="tracing_subscriber" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (d5e7f4782 2022-07-16)" ></div>
 </body></html>

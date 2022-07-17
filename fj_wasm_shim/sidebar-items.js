@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["guest",""],["host",""]]};
+window.SIDEBAR_ITEMS = {"constant":[["ENV_NAME",""]],"mod":[["guest",""],["host",""]],"struct":[["Plugin","The instantiated WebAssembly module that implements a Fornjot plugin."]]};

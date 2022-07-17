@@ -103,6 +103,9 @@
 <span id="97">97</span>
 <span id="98">98</span>
 <span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Abstractions and utilities for defining your own Fornjot plugins.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Creating Your Own Plugin</span>
@@ -134,6 +137,7 @@
 <span class="doccomment">//!     {</span>
 <span class="doccomment">//!         let radius = ctx.parse_argument(&quot;radius&quot;)?;</span>
 <span class="doccomment">//!         let height = ctx.parse_optional_argument(&quot;height&quot;)?.unwrap_or(10.0);</span>
+<span class="doccomment">//!</span>
 <span class="doccomment">//!         let circle = Circle::from_radius(radius);</span>
 <span class="doccomment">//!         Ok(Sketch::from_circle(circle).sweep([height, 0.0, 0.0]).into())</span>
 <span class="doccomment">//!     }</span>
@@ -190,14 +194,16 @@
 )]</span>
 
 <span class="kw">mod</span> <span class="ident">abi</span>;
+<span class="kw">mod</span> <span class="ident">context</span>;
 <span class="kw">mod</span> <span class="ident">host</span>;
 <span class="kw">mod</span> <span class="ident">metadata</span>;
 <span class="kw">mod</span> <span class="ident">model</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">context</span>::{<span class="ident">Context</span>, <span class="ident">ContextError</span>, <span class="ident">ContextExt</span>, <span class="ident">MissingArgument</span>, <span class="ident">ParseFailed</span>},
     <span class="ident">host</span>::{<span class="ident">Host</span>, <span class="ident">HostExt</span>},
     <span class="ident">metadata</span>::{<span class="ident">ArgumentMetadata</span>, <span class="ident">ModelMetadata</span>, <span class="ident">PluginMetadata</span>},
-    <span class="ident">model</span>::{<span class="ident">Context</span>, <span class="ident">ContextExt</span>, <span class="ident">MissingArgument</span>, <span class="ident">Model</span>},
+    <span class="ident">model::Model</span>,
 };
 
 <span class="doccomment">/// The common error type used by this crate.</span>
