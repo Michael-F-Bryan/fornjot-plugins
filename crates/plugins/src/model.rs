@@ -128,7 +128,7 @@ pub enum ContextError {
 }
 
 /// The error returned when a required argument wasn't provided.
-#[derive(Debug, Clone, PartialEq, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
 #[error("The \"{name}\" argument is missing")]
 pub struct MissingArgument {
     /// The argument's name.

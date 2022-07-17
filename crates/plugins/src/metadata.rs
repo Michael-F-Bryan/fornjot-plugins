@@ -1,6 +1,6 @@
 /// Information about a particular plugin that can be used by the host for
 /// things like introspection and search.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 #[allow(missing_docs)]
 pub struct PluginMetadata {
     pub name: String,
@@ -33,7 +33,7 @@ impl PluginMetadata {
         }
 
         PluginMetadata {
-            short_description: Some(short_description.into()),
+            short_description: Some(short_description),
             ..self
         }
     }
@@ -45,7 +45,7 @@ impl PluginMetadata {
         }
 
         PluginMetadata {
-            description: Some(description.into()),
+            description: Some(description),
             ..self
         }
     }
@@ -57,7 +57,7 @@ impl PluginMetadata {
         }
 
         PluginMetadata {
-            homepage: Some(homepage.into()),
+            homepage: Some(homepage),
             ..self
         }
     }
@@ -69,7 +69,7 @@ impl PluginMetadata {
         }
 
         PluginMetadata {
-            repository: Some(repository.into()),
+            repository: Some(repository),
             ..self
         }
     }
@@ -81,7 +81,7 @@ impl PluginMetadata {
         }
 
         PluginMetadata {
-            license: Some(license.into()),
+            license: Some(license),
             ..self
         }
     }
