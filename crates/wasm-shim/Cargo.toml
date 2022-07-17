@@ -17,3 +17,7 @@ tracing-subscriber = "0.3.14"
 wasmtime = "0.38.1"
 wasmtime-runtime = "0.38.1"
 wit-bindgen-wasmtime = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+
+[dev-dependencies]
+assert_cmd = "2.0.4"
+fj-host = { git = "https://github.com/hannobraun/Fornjot" }

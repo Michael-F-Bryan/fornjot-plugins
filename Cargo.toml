@@ -1,2 +1,6 @@
 [workspace]
 members = ["crates/*", "models/*"]
+
+[patch."https://github.com/hannobraun/Fornjot"]
+# Waiting on https://github.com/hannobraun/Fornjot/pull/828
+fj-host = { git = "https://github.com/Michael-F-Bryan/Fornjot", branch = "hotfix/target-dir" }
