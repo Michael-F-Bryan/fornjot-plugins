@@ -1,8 +1,9 @@
-use crate::{ModelConstructor, PluginMetadata};
+use crate::{ArgumentMetadata, Context, ModelMetadata, PluginMetadata};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use std::{
     fmt,
     io::{self, Write},
+    sync::Arc,
 };
 use tracing_subscriber::fmt::{format::Writer, time::FormatTime};
 use wit_bindgen_rust::Handle;
@@ -24,36 +25,20 @@ impl guest::Guest for Guest {
 
         let metadata = unsafe { crate::abi::fornjot_plugin_init(&mut host)? };
 
-        let Host { constructor } = host;
-        let model_constructor = match constructor {
-            Some(c) => c,
-            None => {
-                let err = crate::Error::from(
-                    "No model registered. Did you forget to call the register_plugin!() macro?",
-                );
-                return Err(err.into());
-            }
-        };
+        let Host { models } = host;
 
-        Ok(Handle::new(Plugin {
-            model_constructor,
-            metadata,
-        }))
+        Ok(Handle::new(Plugin { models, metadata }))
     }
 }
 
 pub struct Plugin {
-    model_constructor: ModelConstructor,
+    models: Vec<Handle<Model>>,
     metadata: PluginMetadata,
 }
 
 impl guest::Plugin for Plugin {
-    fn load_model(&self, args: Vec<(String, String)>) -> Result<Handle<Model>, guest::Error> {
-        let args = args.into_iter().collect();
-        let ctx = crate::abi::Context(&args);
-        let model = (self.model_constructor)(&ctx)?;
-
-        Ok(Handle::new(Model(model)))
+    fn models(&self) -> Vec<Handle<Model>> {
+        self.models.clone()
     }
 
     fn metadata(&self) -> guest::PluginMetadata {
@@ -63,20 +48,28 @@ impl guest::Plugin for Plugin {
 
 #[derive(Default)]
 struct Host {
-    constructor: Option<ModelConstructor>,
+    models: Vec<Handle<Model>>,
 }
 
 impl crate::Host for Host {
-    fn register_model_constructor(&mut self, constructor: ModelConstructor) {
-        self.constructor = Some(constructor);
+    fn register_boxed_model(&mut self, model: Box<dyn crate::Model>) {
+        let model = Model(Arc::from(model));
+        self.models.push(Handle::new(model));
     }
 }
 
-pub struct Model(Box<dyn crate::Model>);
+pub struct Model(Arc<dyn crate::Model>);
 
 impl guest::Model for Model {
-    fn shape(&self) -> guest::Shape {
-        self.0.shape().into()
+    fn metadata(&self) -> guest::ModelMetadata {
+        self.0.metadata().into()
+    }
+
+    fn shape(&self, args: Vec<(String, String)>) -> Result<guest::Shape, guest::Error> {
+        let args = args.into_iter().collect();
+        let ctx = crate::abi::Context(&args);
+
+        self.0.shape(&ctx).map(Into::into).map_err(Into::into)
     }
 }
 
@@ -226,6 +219,36 @@ impl From<PluginMetadata> for guest::PluginMetadata {
             homepage,
             repository,
             license,
+        }
+    }
+}
+
+impl From<ModelMetadata> for guest::ModelMetadata {
+    fn from(m: ModelMetadata) -> guest::ModelMetadata {
+        let ModelMetadata {
+            name,
+            description,
+            arguments,
+        } = m;
+        guest::ModelMetadata {
+            name,
+            description,
+            arguments: arguments.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<ArgumentMetadata> for guest::ArgumentMetadata {
+    fn from(m: ArgumentMetadata) -> guest::ArgumentMetadata {
+        let ArgumentMetadata {
+            name,
+            description,
+            default_value,
+        } = m;
+        guest::ArgumentMetadata {
+            name,
+            description,
+            default_value,
         }
     }
 }

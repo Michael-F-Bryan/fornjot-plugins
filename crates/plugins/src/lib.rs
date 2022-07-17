@@ -3,26 +3,32 @@
 //! The typical workflow is to first define a [`Model`] type. This comes with
 //! two main methods,
 //!
-//! 1. Use the [`ModelFromContext`] trait to make the model loadable from the
-//!    host context, and
-//! 2. Calculate the model's shape with the [`Model`] trait
+//! 1. Getting metadata about the model, and
+//! 2. Calculating the model's geometry using arguments from the host context
 //!
 //! ```rust
-//! use fj_plugins::{Model, Context, Error, ModelFromContext};
+//! use fj_plugins::{Model, Context, ContextExt, Error, ModelMetadata, ArgumentMetadata};
+//! use fj::{Shape, Circle, Sketch, syntax::*};
 //!
-//! struct MyModel;
+//! struct Cylinder;
 //!
-//! impl ModelFromContext for MyModel {
-//!     fn from_context(ctx: &dyn Context) -> Result<Self, Error>
-//!     where
-//!         Self: Sized,
-//!     {
-//!         todo!("Load arguments from the context and initialize the model");
+//! impl Model for Cylinder {
+//!     fn metadata(&self) -> ModelMetadata {
+//!         ModelMetadata::new("Cylinder")
+//!             .with_argument("radius")
+//!             .with_argument(
+//!                 ArgumentMetadata::new("height")
+//!                     .with_default_value("10.0"),
+//!             )
 //!     }
-//! }
 //!
-//! impl Model for MyModel {
-//!     fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
+//!     fn shape(&self, ctx: &dyn Context) -> Result<Shape, Error>
+//!     {
+//!         let radius = ctx.parse_argument("radius")?;
+//!         let height = ctx.parse_optional_argument("height")?.unwrap_or(10.0);
+//!         let circle = Circle::from_radius(radius);
+//!         Ok(Sketch::from_circle(circle).sweep([height, 0.0, 0.0]).into())
+//!     }
 //! }
 //! ```
 //!
@@ -32,22 +38,20 @@
 //!
 //! ```rust
 //! use fj_plugins::{Host, HostExt, PluginMetadata};
-//! # use fj_plugins::{Model, Context, Error, ModelFromContext};
+//! # use fj_plugins::{Model, Context, Error, ModelMetadata};
 //!
 //! fj_plugins::register_plugin!(|host: &mut dyn Host| {
-//!     host.register_model::<MyModel>();
+//!     host.register_model(Cylinder);
 //!
 //!     Ok(PluginMetadata::new(
 //!         env!("CARGO_PKG_NAME"),
 //!         env!("CARGO_PKG_VERSION"),
 //!     ))
 //! });
-//! # struct MyModel;
-//! # impl Model for MyModel {
-//! #   fn shape(&self) -> fj::Shape { todo!("Calcualte the model's geometry") }
-//! # }
-//! # impl ModelFromContext for MyModel {
-//! #   fn from_context(ctx: &dyn Context) -> Result<Self, Error> where Self: Sized { todo!(); }
+//! # struct Cylinder;
+//! # impl Model for Cylinder {
+//! #     fn metadata(&self) -> ModelMetadata { unimplemented!() }
+//! #     fn shape(&self, ctx: &dyn Context) -> Result<fj::Shape, Error> { unimplemented!() }
 //! # }
 //! ```
 
@@ -63,9 +67,9 @@ mod metadata;
 mod model;
 
 pub use crate::{
-    host::{Host, HostExt, ModelConstructor},
-    metadata::PluginMetadata,
-    model::{Context, ContextExt, MissingArgument, Model, ModelFromContext},
+    host::{Host, HostExt},
+    metadata::{ArgumentMetadata, ModelMetadata, PluginMetadata},
+    model::{Context, ContextExt, MissingArgument, Model},
 };
 
 /// The common error type used by this crate.

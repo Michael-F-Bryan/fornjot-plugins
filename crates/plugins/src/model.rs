@@ -1,18 +1,14 @@
 use std::{collections::HashMap, str::FromStr};
 
-use crate::Error;
+use crate::{Error, ModelMetadata};
 
 /// A model.
-pub trait Model {
+pub trait Model: Send + Sync {
     /// Calculate this model's concrete geometry.
-    fn shape(&self) -> fj::Shape;
-}
+    fn shape(&self, ctx: &dyn Context) -> Result<fj::Shape, Error>;
 
-/// A [`Model`] that can be loaded purely from the [`Context`].
-pub trait ModelFromContext: Sized {
-    /// Try to initialize this [`Model`] using contextual information it has
-    /// been provided.
-    fn from_context(ctx: &dyn Context) -> Result<Self, Error>;
+    /// Get metadata for the model.
+    fn metadata(&self) -> ModelMetadata;
 }
 
 /// Contextual information passed to a [`Model`] when it is being initialized.

@@ -1,7 +1,20 @@
 use { arguments, shape, error } from common
 
+record argument-metadata {
+    name: string,
+    description: option<string>,
+    default-value: option<string>,
+}
+
+record model-metadata {
+    name: string,
+    description: option<string>,
+    arguments: list<argument-metadata>,
+}
+
 resource model {
-    shape: func() -> shape
+    metadata: func() -> model-metadata
+    shape: func(args: arguments) -> expected<shape, error>
 }
 
 record plugin-metadata {
@@ -16,7 +29,7 @@ record plugin-metadata {
 
 resource plugin {
     metadata: func() -> plugin-metadata
-    load-model: func(args: arguments) -> expected<model, error>
+    models: func() -> list<model>
 }
 
 init: func() -> expected<plugin, error>

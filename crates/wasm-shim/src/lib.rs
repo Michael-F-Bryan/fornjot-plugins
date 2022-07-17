@@ -7,8 +7,8 @@ use std::{
     time::SystemTime,
 };
 
-use anyhow::Context;
-use fj_plugins::{Model, PluginMetadata};
+use anyhow::Context as _;
+use fj_plugins::{ArgumentMetadata, Context, HostExt, Model, ModelMetadata, PluginMetadata};
 use wasmtime::{Engine, Linker, Module, Store};
 
 wit_bindgen_wasmtime::import!("../../wit-files/guest.wit");
@@ -44,38 +44,20 @@ fn init(host: &mut dyn fj_plugins::Host) -> Result<PluginMetadata, fj_plugins::E
 
     tracing::debug!("Initializing the plugin");
     let plugin = guest
-        .init(&mut store)
-        .context("Calling into WebAssembly triggered a trap")?
+        .init(&mut store)?
         .context("Unable to initialize the plugin")?;
 
     let store = Arc::new(Mutex::new(store));
     let guest = Arc::new(guest);
 
-    host.register_model_constructor(Box::new(move |ctx| {
-        tracing::debug!(arguments=?ctx.arguments(), "Loading a model");
-        let mut args: Vec<_> = ctx
-            .arguments()
-            .iter()
-            .map(|(k, v)| (k.as_str(), v.as_str()))
-            .collect();
-
-        // HACK: It looks like wit-bindgen will unconditionally try to
-        // deallocate zero-length arrays, which corrupts the allocator because
-        // zero-length arrays point to garbage (null + align_of<T>). To avoid
-        // this, we make sure there's at least 1 argument in the list.
-        args.push(("", ""));
-
-        let model = guest
-            .plugin_load_model(&mut *store.lock().unwrap(), &plugin, &args)
-            .context("Calling into WebAssembly triggered a trap")?
-            .context("Unable to load the model")?;
-
-        Ok(Box::new(WebAssemblyModel {
+    for model in guest.plugin_models(&mut *store.lock().unwrap(), &plugin)? {
+        let model = WebAssemblyModel {
             guest: Arc::clone(&guest),
             store: Arc::clone(&store),
             model,
-        }))
-    }));
+        };
+        host.register_model(model);
+    }
 
     Ok(PluginMetadata::new(
         env!("CARGO_PKG_NAME"),
@@ -90,17 +72,44 @@ struct WebAssemblyModel {
 }
 
 impl Model for WebAssemblyModel {
-    fn shape(&self) -> fj::Shape {
+    fn metadata(&self) -> fj_plugins::ModelMetadata {
+        let WebAssemblyModel {
+            guest,
+            store,
+            model,
+        } = self;
+
+        guest
+            .model_metadata(&mut *store.lock().unwrap(), model)
+            .expect("Call to WebAssembly failed")
+            .into()
+    }
+
+    fn shape(&self, ctx: &dyn Context) -> Result<fj::Shape, fj_plugins::Error> {
         let WebAssemblyModel {
             guest,
             store,
             model,
         } = self;
         let mut store = store.lock().unwrap();
+
+        let mut args: Vec<_> = ctx
+            .arguments()
+            .iter()
+            .map(|(k, v)| (k.as_str(), v.as_str()))
+            .collect();
+
+        // HACK: It looks like wit-bindgen will unconditionally try to
+        // deallocate zero-length arrays, which corrupts the allocator because
+        // zero-length arrays point to garbage (null + align_of<T>). To avoid
+        // this, we make sure there's at least 1 argument in the list.
+        args.push(("", ""));
+
         guest
-            .model_shape(&mut *store, model)
+            .model_shape(&mut *store, model, &args)
             .expect("Calling the model's shape function raised a trap")
-            .into()
+            .map(Into::into)
+            .map_err(Into::into)
     }
 }
 
@@ -200,5 +209,35 @@ impl From<guest::Circle> for fj::Circle {
 impl From<guest::PolyChain> for Vec<[f64; 2]> {
     fn from(p: guest::PolyChain) -> Self {
         p.points.into_iter().map(|(x, y)| [x, y]).collect()
+    }
+}
+
+impl From<guest::ModelMetadata> for ModelMetadata {
+    fn from(m: guest::ModelMetadata) -> ModelMetadata {
+        let guest::ModelMetadata {
+            name,
+            description,
+            arguments,
+        } = m;
+        ModelMetadata {
+            name,
+            description,
+            arguments: arguments.into_iter().map(Into::into).collect(),
+        }
+    }
+}
+
+impl From<guest::ArgumentMetadata> for ArgumentMetadata {
+    fn from(m: guest::ArgumentMetadata) -> ArgumentMetadata {
+        let guest::ArgumentMetadata {
+            name,
+            description,
+            default_value,
+        } = m;
+        ArgumentMetadata {
+            name,
+            description,
+            default_value,
+        }
     }
 }

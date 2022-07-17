@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use once_cell::sync::Lazy;
 
-use crate::{abi::fornjot_plugin_init, ModelConstructor};
+use crate::{abi::fornjot_plugin_init, Model};
 
 static HOST: Lazy<Host> = Lazy::new(|| {
     let mut host = Host::default();
@@ -33,30 +33,21 @@ static HOST: Lazy<Host> = Lazy::new(|| {
 #[no_mangle]
 pub extern "C" fn model(args: &HashMap<String, String>) -> fj::Shape {
     let ctx = crate::abi::Context(args);
-    let model = (HOST.constructor)(&ctx).expect("Unable to initialize the model");
+    let model = HOST
+        .models
+        .first()
+        .expect("No models were registered inside the register_plugin!() initializer");
 
-    model.shape()
+    model.shape(&ctx).expect("Unable to generate the shape")
 }
 
+#[derive(Default)]
 struct Host {
-    constructor: ModelConstructor,
-}
-
-impl Default for Host {
-    fn default() -> Self {
-        Self {
-            constructor: Box::new(|_| {
-                Err(
-                    "No model registered. Did you forget to call the register_plugin!() macro?"
-                        .into(),
-                )
-            }),
-        }
-    }
+    models: Vec<Box<dyn Model>>,
 }
 
 impl crate::Host for Host {
-    fn register_model_constructor(&mut self, constructor: ModelConstructor) {
-        self.constructor = constructor;
+    fn register_boxed_model(&mut self, model: Box<dyn crate::Model>) {
+        self.models.push(model);
     }
 }
