@@ -44,7 +44,6 @@ impl guest::Guest for Guest {
 
 pub struct Plugin {
     model_constructor: ModelConstructor,
-    #[allow(dead_code)]
     metadata: PluginMetadata,
 }
 
@@ -55,6 +54,10 @@ impl guest::Plugin for Plugin {
         let model = (self.model_constructor)(&ctx)?;
 
         Ok(Handle::new(Model(model)))
+    }
+
+    fn metadata(&self) -> guest::PluginMetadata {
+        self.metadata.clone().into()
     }
 }
 
@@ -201,5 +204,28 @@ impl From<fj::PolyChain> for guest::PolyChain {
 impl From<fj::Circle> for guest::Circle {
     fn from(c: fj::Circle) -> guest::Circle {
         guest::Circle { radius: c.radius() }
+    }
+}
+
+impl From<PluginMetadata> for guest::PluginMetadata {
+    fn from(p: PluginMetadata) -> guest::PluginMetadata {
+        let PluginMetadata {
+            name,
+            version,
+            short_description,
+            description,
+            homepage,
+            repository,
+            license,
+        } = p;
+        guest::PluginMetadata {
+            name,
+            version,
+            short_description,
+            description,
+            homepage,
+            repository,
+            license,
+        }
     }
 }

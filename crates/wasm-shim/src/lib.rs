@@ -60,8 +60,9 @@ fn init(host: &mut dyn fj_plugins::Host) -> Result<PluginMetadata, fj_plugins::E
             .collect();
 
         // HACK: It looks like wit-bindgen will unconditionally try to
-        // deallocate zero-length arrays, so we make sure there's at least 1
-        // argument in the list.
+        // deallocate zero-length arrays, which corrupts the allocator because
+        // zero-length arrays point to garbage (null + align_of<T>). To avoid
+        // this, we make sure there's at least 1 argument in the list.
         args.push(("", ""));
 
         let model = guest

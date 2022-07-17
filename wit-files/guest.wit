@@ -4,7 +4,18 @@ resource model {
     shape: func() -> shape
 }
 
+record plugin-metadata {
+    name: string,
+    version: string,
+    short-description: option<string>,
+    description: option<string>,
+    homepage: option<string>,
+    repository: option<string>,
+    license: option<string>,
+}
+
 resource plugin {
+    metadata: func() -> plugin-metadata
     load-model: func(args: arguments) -> expected<model, error>
 }
 
