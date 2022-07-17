@@ -40,7 +40,7 @@ jobs:
       - name: Compile to WebAssembly
         uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: build
           args: --package cuboid --verbose --target wasm32-unknown-unknown
 
   api-docs:
